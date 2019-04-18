@@ -1,13 +1,28 @@
+ifndef GXX
+	GXX := g++
+endif
 
-SimpleLoader: 
-	g++ -c SimpleLoader.cpp
+ifndef CXXFLAGS
+	CXXFLAGS := -g -std=c++11
+endif
 
-build:SimpleLoader.cpp main.cpp SimpleLoader.h
-	g++ -o analysize  main.cpp SimpleLoader.cpp -std=c++11
-run:$(build)
-	./analysize
-debug:SimpleLoader.cpp main.cpp SimpleLoader.h
-	g++ -o  analysize  -g main.cpp SimpleLoader.cpp -std=c++11
+CxxSources := $(shell find ./ -name "*.cpp" ) #自动寻找当前目录下的源文件
+
+Objs := $(CxxSources:.cpp=.o)
+
+analysize:$(Objs)
+	$(GXX)	-o $@ $(CXXFLAGS)  $(Objs)
+
+-include $(CxxSources:.cpp=.d)
+
+%.d : %.cpp
+	rm -f $@; \
+	$(GXX) -MM $(INCLUDE) $< > $@.$$$$; \
+	sed -e 's,^.*:,$*.o $@:,g'  < $@.$$$$ > $@; \
+	rm -f $@.$$$$
+
+.PHONY : clean
 
 clean:
-	rm analysize SimpleLoader.o
+	@echo $(CxxSources)
+	rm build $(CxxSources:.cpp=.d) $(CxxSources:.cpp=.o) 

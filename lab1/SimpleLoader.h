@@ -3,22 +3,29 @@
 #include<string>
 #include<vector>
 #include<fstream>
+#include<map>
+#include<set>
 #include<iostream>
 using namespace std;
 
 
-class Transaction {
+class DataItem {
 public:
-    int load(string str);
-private:
-    int transaction_no;
+    int load(string str); 
+    int push_back(string item){
+        item_set.push_back(item);
+        return 1;
+    }
     vector<string> item_set;
-    // ~Transaction(){
-    //     item_set.clear();
-    // }
+    private:
+        int transaction_no;
+        
+        // ~Transaction(){
+        //     item_set.clear();
+        // }
 };
 
-vector<Transaction> readGroceryDataSet(string filename);
+vector<DataItem> readGroceryDataSet(string filename);
 vector<string> get_comma_str(string& str);
 vector<string> linesplit(string str, string delime);
 

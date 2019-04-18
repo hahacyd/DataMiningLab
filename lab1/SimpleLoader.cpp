@@ -2,10 +2,10 @@
 #include <algorithm>
 #include <sstream>
 using namespace std;
-vector<Transaction> readGroceryDataSet(string filename)
+vector<DataItem> readGroceryDataSet(string filename)
 {
     //read whole liens from filename
-    vector<Transaction> record;
+    vector<DataItem> record;
 
     ifstream fp(filename.c_str());
 
@@ -22,7 +22,7 @@ vector<Transaction> readGroceryDataSet(string filename)
     // line 样例: "2","{tropical fruit,yogurt,coffee}"
     while (getline(fp, line)) {
         // stringstream line_buffer(line);
-        Transaction one_transaction;
+        DataItem one_transaction;
         one_transaction.load(line);
         record.push_back(one_transaction);
 
@@ -33,7 +33,7 @@ vector<Transaction> readGroceryDataSet(string filename)
 
     return record;
 }
-int Transaction::load(string str)
+int DataItem::load(string str)
 {
     // TODO: read single line
     unsigned int pos_start = 1, pos_end = 0;  //因为 第一个字符肯定是 "
