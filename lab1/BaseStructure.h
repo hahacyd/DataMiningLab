@@ -12,13 +12,14 @@ typedef map<CandidateKey, int> CandidateSet;
 
 class DataBase {
 public:
+//TODO: load 的项集 必须是已排序
     virtual int load(string filename)=0;
     int size(){
         return database.size();
     }
-    CandidateSet apriori_gen(CandidateSet& L);   //
+    int apriori_gen(CandidateSet& L);   //
     bool has_infrequent_subset(CandidateKey cand, CandidateSet& container);
-    int Apriori();
+    int Apriori(int min_sup);
     int print(const CandidateSet&)const;
 
 protected:

@@ -1,0 +1,159 @@
+9835 个样例
+100.00 %
+beef,citrus fruit, 48
+beef,other vegetables, 48
+beef,root vegetables, 81
+beef,tropical fruit, 34
+beef,whole milk, 102
+beef,yogurt, 59
+berries,other vegetables, 22
+berries,whole milk, 29
+berries,yogurt, 39
+bottled beer,liquor, 22
+bottled water,soda, 41
+chicken,citrus fruit, 29
+chicken,hamburger meat, 24
+chicken,other vegetables, 51
+chicken,pork, 34
+chicken,root vegetables, 50
+chicken,soda, 22
+chicken,tropical fruit, 42
+chicken,whole milk, 113
+chicken,yogurt, 44
+citrus fruit,other vegetables, 70
+citrus fruit,pip fruit, 47
+citrus fruit,rolls/buns, 21
+citrus fruit,root vegetables, 64
+citrus fruit,tropical fruit, 129
+citrus fruit,whole milk, 171
+citrus fruit,yogurt, 123
+curd,yogurt, 27
+frankfurter,ham, 20
+frankfurter,hamburger meat, 23
+frankfurter,meat, 27
+frankfurter,other vegetables, 56
+frankfurter,pip fruit, 33
+frankfurter,pork, 47
+frankfurter,rolls/buns, 65
+frankfurter,root vegetables, 57
+frankfurter,sausage, 99
+frankfurter,shopping bags, 21
+frankfurter,soda, 42
+frankfurter,tropical fruit, 91
+frankfurter,whipped/sour cream, 21
+frankfurter,white bread, 24
+frankfurter,whole milk, 202
+frankfurter,yogurt, 110
+grapes,whole milk, 23
+ham,other vegetables, 32
+ham,root vegetables, 22
+ham,tropical fruit, 43
+ham,whole milk, 93
+ham,yogurt, 54
+hamburger meat,other vegetables, 50
+hamburger meat,root vegetables, 34
+hamburger meat,tropical fruit, 26
+hamburger meat,whole milk, 94
+hamburger meat,yogurt, 40
+meat,other vegetables, 37
+meat,pork, 21
+meat,root vegetables, 38
+meat,tropical fruit, 21
+meat,whole milk, 81
+meat,yogurt, 39
+onions,other vegetables, 42
+onions,whole milk, 39
+onions,yogurt, 23
+other vegetables,pastry, 20
+other vegetables,rolls/buns, 68
+other vegetables,shopping bags, 22
+other vegetables,soda, 49
+other vegetables,whipped/sour cream, 35
+other vegetables,white bread, 23
+other vegetables,whole milk, 270
+other vegetables,yogurt, 149
+pastry,soda, 47
+pip fruit,rolls/buns, 26
+pip fruit,root vegetables, 68
+pip fruit,soda, 29
+pip fruit,whole milk, 150
+pip fruit,yogurt, 75
+pork,rolls/buns, 22
+pork,root vegetables, 95
+pork,soda, 40
+pork,tropical fruit, 67
+pork,whipped/sour cream, 29
+pork,whole milk, 184
+pork,yogurt, 74
+rolls/buns,shopping bags, 26
+rolls/buns,soda, 123
+root vegetables,shopping bags, 21
+root vegetables,soda, 37
+root vegetables,whipped/sour cream, 37
+root vegetables,white bread, 20
+root vegetables,whole milk, 308
+root vegetables,yogurt, 135
+sausage,shopping bags, 31
+sausage,sliced cheese, 25
+sausage,soda, 101
+sausage,tropical fruit, 134
+sausage,waffles, 20
+sausage,whipped/sour cream, 23
+sausage,white bread, 25
+sausage,whole milk, 294
+sausage,yogurt, 193
+soda,specialty bar, 31
+soda,specialty chocolate, 32
+soda,waffles, 34
+soda,white wine, 20
+tropical fruit,whipped/sour cream, 36
+tropical fruit,white bread, 32
+tropical fruit,whole milk, 402
+tropical fruit,yogurt, 276
+turkey,whole milk, 36
+turkey,yogurt, 23
+whole milk,yogurt, 551
+ 2 项集收集完毕
+100.00 %
+beef,root vegetables,whole milk, 27
+beef,tropical fruit,whole milk, 20
+beef,whole milk,yogurt, 31
+chicken,root vegetables,whole milk, 25
+chicken,whole milk,yogurt, 20
+citrus fruit,other vegetables,whole milk, 24
+citrus fruit,root vegetables,whole milk, 24
+citrus fruit,tropical fruit,whole milk, 52
+citrus fruit,tropical fruit,yogurt, 38
+citrus fruit,whole milk,yogurt, 54
+frankfurter,other vegetables,whole milk, 21
+frankfurter,pork,whole milk, 21
+frankfurter,root vegetables,whole milk, 25
+frankfurter,sausage,whole milk, 35
+frankfurter,sausage,yogurt, 24
+frankfurter,tropical fruit,whole milk, 50
+frankfurter,tropical fruit,yogurt, 29
+frankfurter,whole milk,yogurt, 61
+ham,tropical fruit,yogurt, 20
+ham,whole milk,yogurt, 31
+hamburger meat,root vegetables,whole milk, 20
+hamburger meat,whole milk,yogurt, 26
+meat,root vegetables,whole milk, 23
+other vegetables,whole milk,yogurt, 69
+pip fruit,root vegetables,whole milk, 34
+pip fruit,whole milk,yogurt, 36
+pork,root vegetables,whole milk, 47
+pork,tropical fruit,whole milk, 26
+pork,whole milk,yogurt, 36
+root vegetables,whole milk,yogurt, 68
+sausage,tropical fruit,whole milk, 69
+sausage,tropical fruit,yogurt, 44
+sausage,whole milk,yogurt, 86
+tropical fruit,whole milk,yogurt, 140
+ 3 项集收集完毕
+100.00 %
+citrus fruit,tropical fruit,whole milk,yogurt, 20
+frankfurter,tropical fruit,whole milk,yogurt, 21
+sausage,tropical fruit,whole milk,yogurt, 29
+ 4 项集收集完毕
+0.00 %
+ 5 项集收集完毕
