@@ -62,59 +62,71 @@ int UnixUserDataBase::load(string filename){
  * 1 使用注册那个迭代的方法基于候选 找出频繁项集
  */ 
 CandidateSet DataBase::apriori_gen(CandidateSet& L){
-    // int length =
+    // 自动在 L 中的 k - 1 频繁项集 自连接 生成 k 项频繁项集
     assert(L.size() > 0);
-    // int length = L[0].first.size();
     int length = L.begin()->first.size();
-    vector<string> result;
+    CandidateKey intersect_result,union_result;
+    CandidateSet candidate_set;
     bool same = 0;
     for (auto&& i : L) {
-
         for(auto&& j : L)
         {
-            set<string>::iterator it1 = i.first.begin(),it2 = j.first.begin();
-            for(int m = 0; m < length; m++,it1++,it2++)
-            {
-                
-                // if()
-                /* code */
-            }
-            
-            // set_intersection(i.first.begin(), i.first.end(), j.first.begin(), j.first.end(), std::back_inserter(result));
+            intersect_result.clear();
+            union_result.clear();
 
-            if (result.size() > length - 1){
-
+            if (i.first == j.first) {
+                continue;
             }
             // 连接步
+            CandidateKey::const_iterator it1_begin = i.first.begin(),
+                                         it1_end = i.first.end(),
+                                         it2_begin = j.first.begin(),
+                                         it2_end = j.first.end();
+            // for(int m = 0; m < length; m++,it1++,it2++)
+            // {
 
+            //     // if()
+            //     /* code */
+            // }
+            
+            set_intersection(i.first.begin(), i.first.end(), j.first.begin(), j.first.end(), std::back_inserter(intersect_result));
 
+            if (intersect_result.size() >= length - 1 && *(it1_end - 1) < *(it2_end - 1)){
+                // cout << "可以连接" << endl;
+                set_union(i.first.begin(), i.first.end(), j.first.begin(), j.first.end(), std::back_inserter(union_result));
+                
+                candidate_set[union_result]++;
+            }
+            
             // 剪枝步
+            for(auto&& i : candidate_set)
+            {
+                has_infrequent_subset(i.first, L);
+            }
         }
+    }
+    // print(candidate_set);
+
+}
+bool DataBase::has_infrequent_subset(CandidateKey cand,CandidateSet& container){
+    //TODO: 判断某一个 自连接 后的候选项集 是否 在原来的候选项集中
+    for(auto&& i : container)
+    {
+        // set<string> candset(cand.begin(), cand.end());
+        // set<string> containerset(container.begin(), container.end());
         
     }
     
 }
-int DataBase::print(const CandidateSet& candset)const{
-    for(auto&& i : candset)
-    {
-        for(auto&& j : i.first)
-        {
-            cout << j << " ";
-        }
-
-        cout << " ";
-        cout <<i.second << endl;
-    }
-    return 1;
-}
 int DataBase::Apriori(){
     // 找出 1 频繁项集
-    map<set<string>, int> frequent_one_set;
+    CandidateSet frequent_one_set;
+    CandidateSet good_frequent_set;
     for (auto&& i : database) {
         for(auto&& j : i.item_set)
         {
-            set<string> s;
-            s.insert(j);
+            CandidateKey s;
+            s.push_back(j);
             frequent_one_set[s]++;
         }
     }
@@ -125,7 +137,23 @@ int DataBase::Apriori(){
     {
         apriori_gen(frequent_one_set);
         /* code */
+        
+
+        break;
     }
-    
+
+    return 1;
+}
+int DataBase::print(const CandidateSet& candset)const{
+    for(auto&& i : candset)
+    {
+        for(auto&& j : i.first)
+        {
+            cout << j << ",";
+        }
+
+        cout << " ";
+        cout <<i.second << endl;
+    }
     return 1;
 }

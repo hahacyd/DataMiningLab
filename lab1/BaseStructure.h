@@ -7,7 +7,8 @@
 using namespace std;
 
 typedef set<string> FrequentItem ;
-typedef map<set<string>, int> CandidateSet;
+typedef vector<string> CandidateKey;
+typedef map<CandidateKey, int> CandidateSet;
 
 class DataBase {
 public:
@@ -16,7 +17,7 @@ public:
         return database.size();
     }
     CandidateSet apriori_gen(CandidateSet& L);   //
-    bool has_infrequent_subset();
+    bool has_infrequent_subset(CandidateKey cand, CandidateSet& container);
     int Apriori();
     int print(const CandidateSet&)const;
 
