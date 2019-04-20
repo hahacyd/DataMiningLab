@@ -70,7 +70,7 @@ public:
     FPTreeNode* getRoot(){
         return fptree_root;
     }
-
+ 
 protected:
     map<string, int> initialize;
 
