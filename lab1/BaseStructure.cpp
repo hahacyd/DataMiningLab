@@ -33,6 +33,33 @@ int GroceryDataBase::load(string filename)
     }
 
     fp.close();
+
+    // 生成 1 频繁项集
+    map<string, int> initialize;
+    for (auto&& i : database) {
+        for (auto&& j : i.item_set) {
+            initialize[j]++;
+        }
+    }
+    vector<string> onetemp;
+    for (auto&& i : initialize) {
+        // if (i.second < min_sup) { //小于 最小支持度的将被过滤
+        //     continue;
+        // }
+        onetemp.push_back(i.first);
+        frequent_one_set[onetemp] = i.second;
+        onetemp.clear();
+    }
+    // 对 frequent_one_set 中的项 按支持度 排序
+    // frequent_one_set.
+    // sort(frequent_one_set.begin(), frequent_one_set.end(),CandidateSet::value_comp());
+    // vfrequent_one_set.assign(frequent_one_set.begin(), frequent_one_set.end());
+    vfrequent_one_set.assign(initialize.begin(), initialize.end());
+    // cout << vfrequent_one_set.size() << endl;
+    sort(vfrequent_one_set.begin(),
+        vfrequent_one_set.end(),
+        [](pair<string, int>& s1, pair<string, int>& s2) -> bool { return s1.second > s2.second; });
+    // print(vfrequent_one_set);
 }
 int UnixUserDataBase::load(string filename)
 {
@@ -156,103 +183,51 @@ bool DataBase::has_infrequent_subset(CandidateKey cand, CandidateSet& container)
 }
 int DataBase::Apriori(int min_sup)
 {
-    // 找出 1 频繁项集
-    CandidateSet frequent_one_set; //初始 集合
-    CandidateSet candidate_item_set; // 候选项集
     CandidateSet good_frequent_set; //最终集合,包含各个达到最小支持度 的频繁项集的集合
 
-    // CandidateKey s;
-    // s.push_back(j);
-    // frequent_one_set[s]++;
-    map<string, int> initialize;
-    for (auto&& i : database) {
-        for (auto&& j : i.item_set) {
-            initialize[j]++;
-        }
-    }
-    vector<string> onetemp;
-    for (auto&& i : initialize) {
-        if (i.second < min_sup) { //小于 最小支持度的将被过滤
-            continue;
-        }
-        onetemp.push_back(i.first);
-        frequent_one_set[onetemp] = i.second;
-        onetemp.clear();
-    }
-
-    // for(auto&& i : initialize)
-    // {
-    //     cout << i.first << " " << i.second << endl;
-    // }
-
-    // for(auto&& i : initialize)
-    // {
-    //     frequent_one_set[CandidateKey(i)]++;
-    // }
-    // print(frequent_one_set);
-    // return 1;
-    // print(frequent_one_set);
-    // FrequentItem
-    for (int k = 1; frequent_one_set.size() != 0; k++) {
-        int test = apriori_gen(frequent_one_set);
+    CandidateSet frequent_set = frequent_one_set;
+    for (int k = 1; frequent_set.size() != 0; k++) {
+        int test = apriori_gen(frequent_set);
         assert(k == test);
         // 检验 apriori_gen 产生的候选项集是否在 原始数据集中，
         float progress_count = 0.0;
         float progress_length = database.size();
         if (progress_length == 0)
             progress_length = 1;
+        
+        // 用于打印 执行 进度
         printf("%.2f %%", 100 * progress_count / progress_length);
-        // for (auto&& i : frequent_one_set) {
-        //     progress_count += 1;
-        //     printf("\r");
-        //     printf("%.2f %%", 100 * progress_count / progress_length);
-        //     fflush(stdout);
 
-        //     for (auto&& j : database) {
-        //         // frequent_one_set[i.first] += all_of(i.first.begin(), i.first.end(),
-        //         //     [&j](string x) -> bool { return std::find(j.item_set.begin(), j.item_set.end(), x) != j.item_set.end(); });
-        //         int spaceX = includes(j.item_set.begin(), j.item_set.end(), i.first.begin(), i.first.end());
-        //         frequent_one_set[i.first] += spaceX;
-        //     }
-        // }
-        // bool spaceX = 0;
-        for (auto&& j : database) {
+        for (auto&& j : database) { //从 数据库 中筛查 候选项集 frequent_set 中每个频繁项集的出现次数,
             progress_count += 1;
             printf("\r");
             printf("%.2f %%", 100 * progress_count / progress_length);
             fflush(stdout);
-            for(auto&& i : frequent_one_set)
+            for(auto&& i : frequent_set)
             {
-                // spaceX = includes(j.item_set.begin(), j.item_set.end(), i.first.begin(), i.first.end());
                 if(includes(j.item_set.begin(), j.item_set.end(), i.first.begin(), i.first.end())){
-                    frequent_one_set[i.first] += 1;
-                // frequent_one_set[i.first] += spaceX;
+                    frequent_set[i.first] += 1;
                 }
             }
         }
 
         printf("\n");
-        // for(auto&& i : frequent_one_set)
-        // {
-        //     if(!(i.second >= min_sup)){
-        //         frequent_one_set.erase(i.first);
-        //     }
-        // }
+        //将 frequent_set 中小于 最小支持度的 频繁项集 删除
         CandidateSet::iterator ittemp;
-        for (CandidateSet::iterator it = frequent_one_set.begin(); it != frequent_one_set.end();) {
+        for (CandidateSet::iterator it = frequent_set.begin(); it != frequent_set.end();) {
             int freq = it->second;
             if (it->second < min_sup) {
                 ittemp = it;
                 it++;
-                frequent_one_set.erase(ittemp);
+                frequent_set.erase(ittemp);
             } else {
                 it++;
             }
         }
 
-        print(frequent_one_set);
+        print(frequent_set);
         printf(" %d 项集收集完毕 \n", k + 1);
-        good_frequent_set.insert(frequent_one_set.begin(), frequent_one_set.end());
+        good_frequent_set.insert(frequent_set.begin(), frequent_set.end());
 
         progress_count = 0;
     }
@@ -268,4 +243,41 @@ int DataBase::print(const CandidateSet& candset) const
         cout << i.second << endl;
     }
     return 1;
+}
+int DataBase::print(const vector<pair<string,int>>& candset)const{
+    for (auto&& i : candset) {
+        cout << i.first;
+        cout << " ";
+        cout << i.second << endl;
+    }
+    return 1;
+}
+
+/**以下是 FPgrowth 算法的实现;
+*/
+int DataBase:: buildFP_growthTree(){
+    vector<string> item_order;
+    for (auto&& i : vfrequent_one_set) {
+        item_order.push_back(i.first);
+    }
+    // for(auto&& i : item_order)
+    // {
+    //     cout << i << endl;
+    // }
+
+    for(auto&& i : database)
+    {
+        //对每个 数据集 中的项(交易) 按 vfrequent_one_set 中的顺序排序,也即 按 每个项在整个数据集的次序来排序
+        // sort()
+        sort(i.item_set.begin(),
+            i.item_set.end(),
+            [&item_order](string& s1, string& s2) -> bool { 
+                                return find(item_order.begin(), item_order.end(), s1) 
+                                                < find(item_order.begin(), item_order.end(), s2); });
+                                            
+    }
+    for(auto&& i : database)
+    {
+        cout << i;
+    }
 }

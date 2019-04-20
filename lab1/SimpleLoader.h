@@ -16,6 +16,7 @@ public:
         item_set.push_back(item);
         return 1;
     }
+    friend ostream& operator<<(ostream& out, DataItem& item);
     vector<string> item_set;
     private:
         int transaction_no;
@@ -24,7 +25,7 @@ public:
         //     item_set.clear();
         // }
 };
-
+ostream& operator<<(ostream& out, DataItem& item);
 vector<DataItem> readGroceryDataSet(string filename);
 vector<string> get_comma_str(string& str);
 vector<string> linesplit(string str, string delime);

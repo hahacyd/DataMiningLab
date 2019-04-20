@@ -65,7 +65,8 @@ int main(int argv,char** argc)
     GroceryDataBase grocerybase(filepath);
     cout << grocerybase.size();
     cout << " 个样例" << endl;
-    grocerybase.Apriori(100);
+    // grocerybase.Apriori(100);
+    grocerybase.buildFP_growthTree();
     // vector<UserComandHistory> record = readUnixUsageDataSet(filepath);
 
     return 1;

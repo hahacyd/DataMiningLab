@@ -110,4 +110,13 @@ ostream& operator<<(ostream& out, UserComandHistory& comandhistory){
         out << i << " ";
     }
     out << std::endl;
+    return out;
+};
+ostream& operator<<(ostream& out, DataItem& item){
+    for(auto&& i : item.item_set)
+    {
+        out << i << ",";
+    }
+    out << endl;
+    return out;
 }
