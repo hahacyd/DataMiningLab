@@ -256,9 +256,9 @@ int DataBase::print(const vector<pair<string,int>>& candset)const{
 
 /**以下是 FPgrowth 算法的实现;
 */
-int DataBase:: buildFP_growthTree(){
-    assert(fptree_root == nullptr);
-    fptree_root = new FPTreeNode("null");
+int DataBase:: buildFP_growthTree(FPTreeNode* node){
+    assert(node != nullptr);
+    // node = new FPTreeNode("null");
 
     vector<string> item_order;
     for (auto&& i : vfrequent_one_set) {
@@ -280,16 +280,44 @@ int DataBase:: buildFP_growthTree(){
 
 
         // 调用此程序来将每个 Trans 加入到FP 树中
-        buildFP_growthTree_SubProcess(fptree_root, i.item_set.begin(),i.item_set.end());
+        buildFP_growthTree_SubProcess(node, i.item_set.begin(),i.item_set.end());
     }
     cout << "建树完成" << endl;
 
 
-    printtree(fptree_root,0);
+    // printtree(node,0);
     // for(auto&& i : database)
     // {
     //     cout << i;
     // }
+}
+int DataBase::FP_growth(){
+    if(fptree_root == nullptr){
+        buildFP_growthTree(fptree_root);
+    }
+    //TODO: 需要完成 FP-growth 树的挖掘
+    assert(fptree_root != nullptr);
+    
+
+}
+int DataBase::FP_growth_subprocess(FPTreeNode* localroot,CandidateKey alpha){
+    assert(localroot != nullptr);
+    if(checkOnePath(localroot)){
+        // tree 包含单个路径
+    }
+    else{
+
+    }
+}
+bool DataBase::checkOnePath(FPTreeNode* root){
+    assert(root != nullptr);
+
+    for (; root != nullptr;root++){
+        if(root->sibling != nullptr){
+            return false;
+        }
+    }
+    return true;
 }
 /** 这是 将要递归的程序:
  * @param node: 当前的树节点(位置)
