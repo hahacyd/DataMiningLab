@@ -72,11 +72,12 @@ public:
     }
 
 protected:
+    map<string, int> initialize;
+
     CandidateSet frequent_one_set; //初始 集合
     vector<pair<string, int>> vfrequent_one_set;
     vector<DataItem> database;
     vector<ItemTableElement> item_table;
-
     FPTreeNode* fptree_root;
 };
 

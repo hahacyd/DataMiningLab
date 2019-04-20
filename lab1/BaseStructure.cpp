@@ -36,7 +36,7 @@ int GroceryDataBase::load(string filename)
     fp.close();
 
     // 生成 1 频繁项集
-    map<string, int> initialize;
+    
     for (auto&& i : database) {
         for (auto&& j : i.item_set) {
             initialize[j]++;
@@ -51,16 +51,10 @@ int GroceryDataBase::load(string filename)
         frequent_one_set[onetemp] = i.second;
         onetemp.clear();
     }
-    // 对 frequent_one_set 中的项 按支持度 排序
-    // frequent_one_set.
-    // sort(frequent_one_set.begin(), frequent_one_set.end(),CandidateSet::value_comp());
-    // vfrequent_one_set.assign(frequent_one_set.begin(), frequent_one_set.end());
-    vfrequent_one_set.assign(initialize.begin(), initialize.end());
-    // cout << vfrequent_one_set.size() << endl;
-    sort(vfrequent_one_set.begin(),
-        vfrequent_one_set.end(),
-        [](pair<string, int>& s1, pair<string, int>& s2) -> bool { return s1.second > s2.second; });
-    // print(vfrequent_one_set);
+    // vfrequent_one_set.assign(initialize.begin(), initialize.end());
+    // sort(vfrequent_one_set.begin(),
+    //     vfrequent_one_set.end(),
+    //     [](pair<string, int>& s1, pair<string, int>& s2) -> bool { return s1.second > s2.second; });
 }
 int UnixUserDataBase::load(string filename)
 {
@@ -258,34 +252,32 @@ int DataBase::print(const vector<pair<string,int>>& candset)const{
 */
 int DataBase:: buildFP_growthTree(FPTreeNode* node){
     assert(node != nullptr);
-    // node = new FPTreeNode("null");
 
-    vector<string> item_order;
-    for (auto&& i : vfrequent_one_set) {
-        item_order.push_back(i.first);
-    }
-    // for(auto&& i : item_order)
-    // {
-    //     cout << i << endl;
+    // vector<string> item_order;
+    // for (auto&& i : vfrequent_one_set) {
+    //     item_order.push_back(i.first);
     // }
+
 
     for(auto&& i : database)
     {
         //对每个 数据集 中的项(交易) 按 vfrequent_one_set 中的顺序排序,也即 按 每个项在整个数据集的次序来排序
+        // sort(i.item_set.begin(),
+        //     i.item_set.end(),
+        //     [&item_order](string& s1, string& s2) -> bool { 
+        //                         return find(item_order.begin(), item_order.end(), s1) 
+        //                                         < find(item_order.begin(), item_order.end(), s2); });
         sort(i.item_set.begin(),
             i.item_set.end(),
-            [&item_order](string& s1, string& s2) -> bool { 
-                                return find(item_order.begin(), item_order.end(), s1) 
-                                                < find(item_order.begin(), item_order.end(), s2); });
-
-
+            [&](string& s1, string& s2) -> bool { return initialize[s1] > initialize[s2]; });
+        
         // 调用此程序来将每个 Trans 加入到FP 树中
         buildFP_growthTree_SubProcess(node, i.item_set.begin(),i.item_set.end());
     }
     cout << "建树完成" << endl;
 
 
-    // printtree(node,0);
+    printtree(node,0);
     // for(auto&& i : database)
     // {
     //     cout << i;
