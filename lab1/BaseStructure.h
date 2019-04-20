@@ -16,7 +16,7 @@ class DataBase {
 public:
 //TODO: load 的项集 必须是已排序
     DataBase():fptree_root(nullptr){
-
+        // fptree_root = new FPTreeNode;
     }
     virtual int load(string filename)=0;
     int size(){
@@ -28,12 +28,16 @@ public:
     int print(const CandidateSet&)const;
     int print(const vector<pair<string, int> >& candset) const;
     int buildFP_growthTree();
+    int buildFP_growthTree_SubProcess(FPTreeNode* node, vector<string>::iterator item_iter,vector<string>::iterator item_end);
+    int addsibling(FPTreeNode* p, string& item_name);
+    int addchild(FPTreeNode* p, string& item_name);
 
 protected:
     CandidateSet frequent_one_set; //初始 集合
     vector<pair<string, int>> vfrequent_one_set;
     vector<DataItem> database;
     vector<ItemTableElement> item_table;
+
     FPTreeNode* fptree_root;
 };
 
@@ -54,9 +58,28 @@ class UnixUserDataBase:public DataBase{
 };
 class FPTreeNode {
 public:
-    FPTreeNode()
+    FPTreeNode(string name)
         : supply(0)
-        , item_name(){};
+        , item_name(name){
+        child = nullptr;
+        sibling = nullptr;
+        parent = nullptr;
+    };
+    // FPTreeNode():supply(0),item_name(){
+    //     child = nullptr;
+    //     sibling = nullptr;
+    //     parent = nullptr; 
+    // }
+    int addSupply(){
+        supply++;
+    }
+    int getSupply(){
+        return supply;
+    }
+    string getItemName(){
+        return item_name;
+    }
+    FPTreeNode *child, *sibling,*parent;
 
 private:
     int supply; //每个节点的支持度

@@ -256,6 +256,7 @@ int DataBase::print(const vector<pair<string,int>>& candset)const{
 /**以下是 FPgrowth 算法的实现;
 */
 int DataBase:: buildFP_growthTree(){
+    assert(fptree_root == nullptr);
     vector<string> item_order;
     for (auto&& i : vfrequent_one_set) {
         item_order.push_back(i.first);
@@ -268,16 +269,62 @@ int DataBase:: buildFP_growthTree(){
     for(auto&& i : database)
     {
         //对每个 数据集 中的项(交易) 按 vfrequent_one_set 中的顺序排序,也即 按 每个项在整个数据集的次序来排序
-        // sort()
         sort(i.item_set.begin(),
             i.item_set.end(),
             [&item_order](string& s1, string& s2) -> bool { 
                                 return find(item_order.begin(), item_order.end(), s1) 
                                                 < find(item_order.begin(), item_order.end(), s2); });
-                                            
+
+
+        // 调用此程序来将每个 Trans 加入到FP 树中
+        buildFP_growthTree_SubProcess(fptree_root, i.item_set.begin(),i.item_set.end());
     }
-    for(auto&& i : database)
-    {
-        cout << i;
-    }
+    cout << "建树完成" << endl;
+    // for(auto&& i : database)
+    // {
+    //     cout << i;
+    // }
+}
+/** 这是 将要递归的程序:
+ * @param node: 当前的树节点(位置)
+ * @param item: 处理 Trans 的一个 item
+ */  
+int DataBase::buildFP_growthTree_SubProcess(FPTreeNode* node, vector<string>::iterator item_iter,vector<string>::iterator item_end){
+    
+    // fptree_root = new FPTreeNode("null");
+
+    // FPTreeNode* child = node->child;
+    // if(child == nullptr){
+    //     node->child = new FPTreeNode(*item_iter);
+    //     buildFP_growthTree_SubProcess(node->child, item_iter++,item_end);
+    // }
+    // else{ // 在node 的孩子节点上找 到与当前项(item)相同的节点
+    //     // vector<string>::iterator it = item_iter;
+    //     FPTreeNode* sibling = child,*cur = child;
+    //     while (sibling->getItemName() != *item_iter && sibling->sibling != nullptr) {
+    //         cur = sibling;
+    //         sibling = sibling->sibling;
+    //     }
+    //     if(sibling == nullptr){  // 说明这一层没有对应的节点，应该再建一个兄弟节点
+    //         addsibling(cur, *item_iter);
+    //         assert(cur->sibling != nullptr);
+    //         buildFP_growthTree_SubProcess(cur->sibling, item_iter++, item_end);
+    //     }
+    //     else{  //这一层找到了对应的节点
+    //         buildFP_growthTree_SubProcess(sibling, item_iter++, item_end);
+    //     }
+    // }
+    return 1;
+}
+int DataBase::addsibling(FPTreeNode* p, string& item_name){
+    assert(p->sibling == nullptr);
+    p->sibling = new FPTreeNode(item_name);
+
+    return 1;
+}
+int DataBase::addchild(FPTreeNode* p, string& item_name){
+    assert(p->child == nullptr);
+    p->child = new FPTreeNode(item_name);
+
+    return 1;
 }
