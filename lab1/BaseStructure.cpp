@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <map>
 #include <stdio.h>
+#include"debug.h"
 // using namespace std;
 
 int GroceryDataBase::load(string filename)
@@ -257,6 +258,8 @@ int DataBase::print(const vector<pair<string,int>>& candset)const{
 */
 int DataBase:: buildFP_growthTree(){
     assert(fptree_root == nullptr);
+    fptree_root = new FPTreeNode("null");
+
     vector<string> item_order;
     for (auto&& i : vfrequent_one_set) {
         item_order.push_back(i.first);
@@ -280,6 +283,9 @@ int DataBase:: buildFP_growthTree(){
         buildFP_growthTree_SubProcess(fptree_root, i.item_set.begin(),i.item_set.end());
     }
     cout << "建树完成" << endl;
+
+
+    printtree(fptree_root,0);
     // for(auto&& i : database)
     // {
     //     cout << i;
@@ -289,42 +295,95 @@ int DataBase:: buildFP_growthTree(){
  * @param node: 当前的树节点(位置)
  * @param item: 处理 Trans 的一个 item
  */  
-int DataBase::buildFP_growthTree_SubProcess(FPTreeNode* node, vector<string>::iterator item_iter,vector<string>::iterator item_end){
+int DataBase::buildFP_growthTree_SubProcess(FPTreeNode* node, CandidateKey::iterator item_iter,CandidateKey::iterator item_end){
+    //FIXME: 有段错的bug
+    assert(node != nullptr);
+    if(item_iter == item_end){  //某一个 Trans 的所有项都处理完成了
+        return 1;   
+    }
+    assert(item_iter != item_end);
+
     
     // fptree_root = new FPTreeNode("null");
+    
+    FPTreeNode* child = node->child;
+    if(child == nullptr){
+        node->child = new FPTreeNode(*item_iter);
+        node->child->addSupply();
 
-    // FPTreeNode* child = node->child;
-    // if(child == nullptr){
-    //     node->child = new FPTreeNode(*item_iter);
-    //     buildFP_growthTree_SubProcess(node->child, item_iter++,item_end);
-    // }
-    // else{ // 在node 的孩子节点上找 到与当前项(item)相同的节点
-    //     // vector<string>::iterator it = item_iter;
-    //     FPTreeNode* sibling = child,*cur = child;
-    //     while (sibling->getItemName() != *item_iter && sibling->sibling != nullptr) {
-    //         cur = sibling;
-    //         sibling = sibling->sibling;
-    //     }
-    //     if(sibling == nullptr){  // 说明这一层没有对应的节点，应该再建一个兄弟节点
-    //         addsibling(cur, *item_iter);
-    //         assert(cur->sibling != nullptr);
-    //         buildFP_growthTree_SubProcess(cur->sibling, item_iter++, item_end);
-    //     }
-    //     else{  //这一层找到了对应的节点
-    //         buildFP_growthTree_SubProcess(sibling, item_iter++, item_end);
-    //     }
-    // }
+        addItemAddress2ItemTable(*item_iter, node->child);
+
+        buildFP_growthTree_SubProcess(node->child, ++item_iter, item_end);
+    }
+    else{ // 在node 的孩子节点上找 到与当前项(item)相同的节点
+        // vector<string>::iterator it = item_iter;
+        FPTreeNode* sibling = child,*cur = child;
+        //在这一层查找 符合条件的节点
+        while (sibling != nullptr && sibling->getItemName() != *item_iter) {
+            cur = sibling;
+            sibling = sibling->sibling;
+        }
+        if(sibling == nullptr){  // 说明这一层没有对应的节点，cur 是这一层最后一个节点, 应该再建一个兄弟节点
+            addsibling(cur, *item_iter);
+
+            assert(cur->sibling != nullptr);
+            cur->sibling->addSupply();
+            addItemAddress2ItemTable(*item_iter, cur->sibling);
+
+            buildFP_growthTree_SubProcess(cur->sibling, ++item_iter, item_end);
+        }
+        else{  //这一层找到了对应的节点
+            sibling->addSupply();
+            addItemAddress2ItemTable(*item_iter, sibling);
+            buildFP_growthTree_SubProcess(sibling, ++item_iter, item_end);
+        }
+    }
     return 1;
+}
+void DataBase::printtree(FPTreeNode* node,int layer){
+    if(node == nullptr){
+        return;
+    }
+    assert(node != nullptr);
+
+    for (int i = 0; i < layer;i++){
+        cout << " ";
+    }
+    cout << node->getItemName() << "(" << node->getSupply() << ")" << endl;
+
+    FPTreeNode* it = node->child;
+    for (; it != nullptr;it = it->sibling){
+        printtree(it, layer + 2);
+    }
+    // cout << endl;
 }
 int DataBase::addsibling(FPTreeNode* p, string& item_name){
     assert(p->sibling == nullptr);
     p->sibling = new FPTreeNode(item_name);
 
+    p->sibling->parent = p->parent;
     return 1;
 }
 int DataBase::addchild(FPTreeNode* p, string& item_name){
     assert(p->child == nullptr);
     p->child = new FPTreeNode(item_name);
 
+    p->child->parent = p;
+    return 1;
+};
+int DataBase::addItemAddress2ItemTable(string& item_name, FPTreeNode* address){
+    for(auto&& i : item_table)
+    {
+        if(i.item_name == item_name){
+            // i.fp_treenode_chains.push_back(address);
+            i.fp_treenode_chains.insert(address);
+            i.supply++;
+
+            return 1;
+        }
+    }
+    // 执行 到这里 说明 项头表中没有 这个 名为 item_name 的项
+    item_table.push_back(ItemTableElement(item_name));
+    item_table.rbegin()->fp_treenode_chains.insert(address);
     return 1;
 }

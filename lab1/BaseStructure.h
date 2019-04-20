@@ -31,6 +31,8 @@ public:
     int buildFP_growthTree_SubProcess(FPTreeNode* node, vector<string>::iterator item_iter,vector<string>::iterator item_end);
     int addsibling(FPTreeNode* p, string& item_name);
     int addchild(FPTreeNode* p, string& item_name);
+    void printtree(FPTreeNode* node, int layer);
+    int addItemAddress2ItemTable(string& item_name, FPTreeNode* address);
 
 protected:
     CandidateSet frequent_one_set; //初始 集合
@@ -87,8 +89,10 @@ private:
 };
 class ItemTableElement {
 public:
-private:
+    ItemTableElement(string name)
+        : item_name(name),supply(1){};
+    // private:
     int supply;
     string item_name;
-    vector<FPTreeNode*> fp_treenode_chains; //记录 FPTree_growth 树中相同 项的位置
+    set<FPTreeNode*> fp_treenode_chains; //记录 FPTree_growth 树中相同 项的位置
 };
