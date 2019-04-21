@@ -55,7 +55,7 @@ public:
     bool has_infrequent_subset(CandidateKey cand, CandidateSet& container);
     int Apriori(int min_sup);
 
-
+    int sortItem(CandidateKey& s);
     int buildFP_growthTree(int min_sup);
     int FP_growth();
     int FP_growth_subprocess(FPTreeNode* localroot, CandidateKey alpha,vector<ItemTableElement>& item_table);

@@ -221,7 +221,7 @@ int DataBase::buildFP_growthTree(int min_sup)
 {
     this->min_sup = min_sup;
     buildFP_growthTree(getRoot());
-    printtree(fptree_root,0);
+    // printtree(fptree_root,0);
 }
 /**以下是 FPgrowth 算法的实现;
 */
@@ -252,15 +252,20 @@ int DataBase::buildFP_growthTree(FPTreeNode* node)
     for (auto&& i : database) {
         // 先 将 database 中的Trans的 不满足最小支持度的条目删除
 
-        sort(i.item_set.begin(),
-            i.item_set.end(),
-            [&](string& s1, string& s2) -> bool { return (initialize[s1] > initialize[s2])|| (initialize[s1] == initialize[s2] && s1 < s2) ; });//|| (initialize[s1] == initialize[s2] && s1 < s2)
-
+        // sort(i.item_set.begin(),
+        //     i.item_set.end(),
+        //     [&](string& s1, string& s2) -> bool { return (initialize[s1] > initialize[s2])|| (initialize[s1] == initialize[s2] && s1 < s2) ; });//|| (initialize[s1] == initialize[s2] && s1 < s2)
+        sortItem(i.item_set);
         // 调用此程序来将每个 Trans 加入到FP 树中
         buildFP_growthTree_SubProcess(node, i.item_set.begin(), i.item_set.end(), this->item_table);
     }
     cout << "建树完成" << endl;
 }
+int DataBase::sortItem(CandidateKey& s){
+    sort(s.begin(),
+            s.end(),
+            [&](string& s1, string& s2) -> bool { return (initialize[s1] > initialize[s2])|| (initialize[s1] == initialize[s2] && s1 < s2) ; });//|| (initialize[s1] == initialize[s2] && s1 < s2)
+};
 int DataBase::buildcondTree(FPTreeNode* node, CandidateSet& condpat, vector<ItemTableElement>& local_itemtable)
 {
     assert(node != nullptr);
@@ -287,12 +292,30 @@ int DataBase::FP_growth()
     // test.push_back("null");
     FP_growth_subprocess(fptree_root, test, this->item_table);
 
+    CandidateSet::iterator it = good_frequent_set.begin();
+    for (; it != good_frequent_set.end();) {
+        if(it->second < min_sup){
+            it = good_frequent_set.erase(it);
+        }
+        else{
+            it++;
+        }
+    }
+    // for(auto i : good_frequent_set)
+    // {
+    //     if(i.second < min_sup){
+    //         good_frequent_set.erase(i.first);
+    //     }
+    // }
     print(good_frequent_set);
     return 1;
 }
 int DataBase::FP_growth_subprocess(FPTreeNode* localroot, CandidateKey alpha, vector<ItemTableElement>& item_table)
 {
     assert(localroot != nullptr);
+    if(localroot->child == nullptr){
+        return 1;
+    }
     //对 item_table 排序
     sort(item_table.begin(),
         item_table.end(), [](ItemTableElement s1, ItemTableElement s2) -> bool { return s1.supply < s2.supply; });
@@ -302,20 +325,20 @@ int DataBase::FP_growth_subprocess(FPTreeNode* localroot, CandidateKey alpha, ve
 
     // }
     // return 1;
-    if (checkOnePath(localroot)) {
-        // tree 包含单个路径
-        //去这个路径上的每个组合，与 alpha 取并，其支持度是这个组合中的各项支持度的最小值
-        // cout << "welcome " << alpha.size()<<endl;
-        // printtree(localroot, 0);
-        // for (auto&& i : item_table) {
-        //     cout << i.item_name << " " << i.supply << endl;
-        // }
-        // for(auto&& i : alpha)
-        // {
-        //     cout << i << endl;
-        // }
-        return 1;
-    } else {
+    // if (checkOnePath(localroot)) {
+    //     // tree 包含单个路径
+    //     //去这个路径上的每个组合，与 alpha 取并，其支持度是这个组合中的各项支持度的最小值
+    //     cout << "welcome " << alpha.size()<<endl;
+    //     // printtree(localroot, 0);
+    //     // for (auto&& i : item_table) {
+    //     //     cout << i.item_name << " " << i.supply << endl;
+    //     // }
+    //     // for(auto&& i : alpha)
+    //     // {
+    //     //     cout << i << endl;
+    //     // }
+    //     return 1;
+    // } else {
         // 遍历 树 localroot 中的项头表，为每一项都生成它的 条件模式基
         float progress_count = 0.0;
         float progress_length = item_table.size();
@@ -325,6 +348,7 @@ int DataBase::FP_growth_subprocess(FPTreeNode* localroot, CandidateKey alpha, ve
                 progress_length = 1;
             printf("%.2f %%", 100 * progress_count / progress_length);
         }
+
         for (auto&& i : item_table) {
             if (localroot == fptree_root) {
                 progress_count += 1;
@@ -334,11 +358,11 @@ int DataBase::FP_growth_subprocess(FPTreeNode* localroot, CandidateKey alpha, ve
             }
 
             alpha.insert(alpha.begin(), i.item_name);
-            if (alpha.size() > 2) {
+            if (alpha.size() >= 2) {
                 good_frequent_set[alpha] = i.supply;
             }
 
-            CandidateSet condpat; //项头表中某一个 项的所有条件模式基 的集合
+            CandidateSet condpat; //获取前缀路径
             CandidateKey conditem_name;
 
             for (auto&& j : i.fp_treenode_chains) {
@@ -349,33 +373,29 @@ int DataBase::FP_growth_subprocess(FPTreeNode* localroot, CandidateKey alpha, ve
                 }
                 // 得到的 conditem_name 默认是已排好序的
                 if (conditem_name.size() > 0) {
-                    condpat[conditem_name] = j->getSupply();
+                    sortItem(conditem_name);
+                    condpat[conditem_name] += j->getSupply();
                 }
             }
+            // cout << endl<<i.item_name << endl;
             // print(condpat);
             // break;
             //此时获得一个项的所有条件模式基 condpat,再给它创建一个条件模式树 和 这个树的项头表
-            FPTreeNode* condroot = new FPTreeNode("null");
-            vector<ItemTableElement> local_itemtable;
-            buildcondTree(condroot, condpat, local_itemtable);
-
-            //递归对这个条件模式基做同样的处理 ：
-
-            // printtree(condroot,0);
-
-            FP_growth_subprocess(condroot, alpha, local_itemtable);
-
-            // for(auto&& m : local_itemtable)
-            // {
-            //     cout << m.item_name << " " << m.supply << endl;
-            // }
+            if(condpat.size() > 0){
+                FPTreeNode* condroot = new FPTreeNode("null");
+                vector<ItemTableElement> local_itemtable;
+                buildcondTree(condroot, condpat, local_itemtable);
+                if(local_itemtable.size() > 0){
+                    FP_growth_subprocess(condroot, alpha, local_itemtable);
+                }
+            }
             alpha.erase(alpha.begin());
             // break;
         }
         if (localroot == fptree_root) {
             printf("\n");
         }
-    }
+    // }
 }
 bool DataBase::checkOnePath(FPTreeNode* root)
 {

@@ -3,7 +3,7 @@ ifndef GXX
 endif
 
 ifndef CXXFLAGS
-	CXXFLAGS := -g -pg -std=c++11 #-O2
+	CXXFLAGS := -g -pg -std=c++11 -O2
 endif
 
 CxxSources := $(shell find ./ -name "*.cpp" ) #自动寻找当前目录下的源文件
