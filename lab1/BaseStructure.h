@@ -104,5 +104,5 @@ public:
     // private:
     int supply;
     string item_name;
-    set<FPTreeNode*> fp_treenode_chains; //记录 FPTree_growth 树中相同 项的位置
+    vector<FPTreeNode*> fp_treenode_chains; //记录 FPTree_growth 树中相同 项的位置
 };

@@ -67,6 +67,7 @@ int main(int argv,char** argc)
     cout << " 个样例" << endl;
     // grocerybase.Apriori(100);
     grocerybase.buildFP_growthTree(grocerybase.getRoot());
+    grocerybase.FP_growth();
     // vector<UserComandHistory> record = readUnixUsageDataSet(filepath);
 
     return 1;

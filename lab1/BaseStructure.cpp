@@ -19,7 +19,6 @@ int GroceryDataBase::load(string filename)
         cout << "失败 " << endl;
     }
 
-    // cout << fp.is_open() << endl;
     string line;
     getline(fp, line); //the first line is nosense
 
@@ -257,8 +256,6 @@ int DataBase:: buildFP_growthTree(FPTreeNode* node){
     // for (auto&& i : vfrequent_one_set) {
     //     item_order.push_back(i.first);
     // }
-
-
     for(auto&& i : database)
     {
         //对每个 数据集 中的项(交易) 按 vfrequent_one_set 中的顺序排序,也即 按 每个项在整个数据集的次序来排序
@@ -277,7 +274,7 @@ int DataBase:: buildFP_growthTree(FPTreeNode* node){
     cout << "建树完成" << endl;
 
 
-    printtree(node,0);
+    // printtree(node,0);
     // for(auto&& i : database)
     // {
     //     cout << i;
@@ -289,16 +286,34 @@ int DataBase::FP_growth(){
     }
     //TODO: 需要完成 FP-growth 树的挖掘
     assert(fptree_root != nullptr);
-    
-
+    CandidateKey test;
+    test.push_back("null");
+    FP_growth_subprocess(fptree_root, test);
 }
 int DataBase::FP_growth_subprocess(FPTreeNode* localroot,CandidateKey alpha){
     assert(localroot != nullptr);
     if(checkOnePath(localroot)){
         // tree 包含单个路径
+        //去这个路径上的每个组合，与 alpha 取并，其支持度是这个组合中的各项支持度的最小值
     }
     else{
-
+        // 遍历 树 localroot 中的项头表，为每一项都生成它的 条件模式基
+        for(auto&& i : item_table)
+        {
+            CandidateSet condpat;//项头表中某一个 项的所有条件模式基 的集合
+            for (auto&& j : i.fp_treenode_chains) {
+                CandidateKey conditem_name;
+                FPTreeNode* it = j;
+                for (; it->getItemName() != "null";it = it->parent){
+                    conditem_name.insert(conditem_name.begin(), it->getItemName());
+                }
+                // 得到的 conditem_name 默认是已排好序的
+                condpat[conditem_name] = j->getSupply();
+            }
+            print(condpat);
+            break;
+        }
+    
     }
 }
 bool DataBase::checkOnePath(FPTreeNode* root){
@@ -316,7 +331,6 @@ bool DataBase::checkOnePath(FPTreeNode* root){
  * @param item: 处理 Trans 的一个 item
  */  
 int DataBase::buildFP_growthTree_SubProcess(FPTreeNode* node, CandidateKey::iterator item_iter,CandidateKey::iterator item_end){
-    //FIXME: 有段错的bug
     assert(node != nullptr);
     if(item_iter == item_end){  //某一个 Trans 的所有项都处理完成了
         return 1;   
@@ -328,7 +342,8 @@ int DataBase::buildFP_growthTree_SubProcess(FPTreeNode* node, CandidateKey::iter
     
     FPTreeNode* child = node->child;
     if(child == nullptr){
-        node->child = new FPTreeNode(*item_iter);
+        // node->child = new FPTreeNode(*item_iter);
+        addchild(node, *item_iter);
         node->child->addSupply();
 
         addItemAddress2ItemTable(*item_iter, node->child);
@@ -396,7 +411,7 @@ int DataBase::addItemAddress2ItemTable(string& item_name, FPTreeNode* address){
     {
         if(i.item_name == item_name){
             // i.fp_treenode_chains.push_back(address);
-            i.fp_treenode_chains.insert(address);
+            i.fp_treenode_chains.push_back(address);
             i.supply++;
 
             return 1;
@@ -404,6 +419,6 @@ int DataBase::addItemAddress2ItemTable(string& item_name, FPTreeNode* address){
     }
     // 执行 到这里 说明 项头表中没有 这个 名为 item_name 的项
     item_table.push_back(ItemTableElement(item_name));
-    item_table.rbegin()->fp_treenode_chains.insert(address);
+    item_table.rbegin()->fp_treenode_chains.push_back(address);
     return 1;
 }
