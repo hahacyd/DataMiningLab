@@ -61,13 +61,14 @@ public:
     int FP_growth_subprocess(FPTreeNode* localroot, CandidateKey alpha);
     bool checkOnePath(FPTreeNode* root);
     int buildFP_growthTree(FPTreeNode* node);
-    int buildFP_growthTree_SubProcess(FPTreeNode* node, vector<string>::iterator item_iter,vector<string>::iterator item_end);
+    int buildFP_growthTree_SubProcess(FPTreeNode* node, vector<string>::iterator item_iter,vector<string>::iterator item_end,vector<ItemTableElement>& item_table);
     int addsibling(FPTreeNode* p, string& item_name);
     int addchild(FPTreeNode* p, string& item_name);
     void printtree(FPTreeNode* node, int layer);
-    int addItemAddress2ItemTable(string& item_name, FPTreeNode* address);
-
-    FPTreeNode* getRoot(){
+    int addItemAddress2ItemTable(string& item_name, FPTreeNode* address,vector<ItemTableElement>& item_table);
+    int buildcondTree(FPTreeNode* node, CandidateSet& condpat,vector<ItemTableElement>& local_itemtable);
+    FPTreeNode* getRoot()
+    {
         return fptree_root;
     }
  

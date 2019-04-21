@@ -8,6 +8,7 @@
 #include<iostream>
 using namespace std;
 
+typedef vector<string> CandidateKey;
 
 class DataItem {
 public:
