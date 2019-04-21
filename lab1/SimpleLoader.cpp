@@ -45,7 +45,13 @@ int DataItem::load(string str)
     pos_end = str.find("\"", pos_start);
 
     string substr = str.substr(pos_start, pos_end - pos_start - 1);
-    item_set = linesplit(substr, string(","));
+
+    stringstream s(string(substr.begin(), substr.end()));
+    string item;
+    while(getline(s,item,',')){
+        item_set.push_back(item);
+    }
+    //item_set = linesplit(substr, string(","));
 
     // for(auto&& i : items)
     // {

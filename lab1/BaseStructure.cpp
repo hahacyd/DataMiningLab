@@ -1,16 +1,13 @@
 #include "BaseStructure.h"
 #include "SimpleLoader.h"
+#include "debug.h"
 #include <algorithm>
 #include <map>
 #include <stdio.h>
-#include"debug.h"
 // using namespace std;
 
 int GroceryDataBase::load(string filename)
 {
-    //read whole liens from filename
-    // vector<DataItem> transet;
-
     ifstream fp(filename.c_str());
 
     if (!fp.is_open()) { // check file whether or not exist
@@ -35,7 +32,7 @@ int GroceryDataBase::load(string filename)
     fp.close();
 
     // 生成 1 频繁项集
-    
+
     for (auto&& i : database) {
         for (auto&& j : i.item_set) {
             initialize[j]++;
@@ -43,17 +40,10 @@ int GroceryDataBase::load(string filename)
     }
     vector<string> onetemp;
     for (auto&& i : initialize) {
-        // if (i.second < min_sup) { //小于 最小支持度的将被过滤
-        //     continue;
-        // }
         onetemp.push_back(i.first);
         frequent_one_set[onetemp] = i.second;
         onetemp.clear();
     }
-    // vfrequent_one_set.assign(initialize.begin(), initialize.end());
-    // sort(vfrequent_one_set.begin(),
-    //     vfrequent_one_set.end(),
-    //     [](pair<string, int>& s1, pair<string, int>& s2) -> bool { return s1.second > s2.second; });
 }
 int UnixUserDataBase::load(string filename)
 {
@@ -98,31 +88,13 @@ int DataBase::apriori_gen(CandidateSet& L)
             intersect_result.clear();
             union_result.clear();
 
-            if (i.first == j.first) {
-                // cout << "厉害厉害" << endl;
-                // exit(-1);
-                // if(length == 3){
-                //   for(auto&& q:i.first)
-                // {
-                //     cout << q << ",";
-                // }
-                // cout << endl;
-                // for (auto&& w : j.first) {
-                //     cout << w << ",";
-                // }
-                // exit(-1);  
-                // }
-                
-                continue;
-            }
-
             CandidateKey::const_iterator it1_begin = i.first.begin(),
                                          it1_end = i.first.end(),
                                          it2_begin = j.first.begin(),
                                          it2_end = j.first.end();
             set_intersection(i.first.begin(), i.first.end(), j.first.begin(), j.first.end(), std::back_inserter(intersect_result));
 
-            if (intersect_result.size() >= length - 1 ) {//&& *(it1_end - 1) < *(it2_end - 1)
+            if (intersect_result.size() >= length - 1) { //&& *(it1_end - 1) < *(it2_end - 1)
                 // 这里 candidate 中的项集 中的项自然是有序的，这是 set_union 所决定的
                 set_union(i.first.begin(), i.first.end(), j.first.begin(), j.first.end(), std::back_inserter(union_result));
 
@@ -177,7 +149,6 @@ bool DataBase::has_infrequent_subset(CandidateKey cand, CandidateSet& container)
 }
 int DataBase::Apriori(int min_sup)
 {
-    CandidateSet good_frequent_set; //最终集合,包含各个达到最小支持度 的频繁项集的集合
 
     CandidateSet frequent_set = frequent_one_set;
     for (int k = 1; frequent_set.size() != 0; k++) {
@@ -188,7 +159,7 @@ int DataBase::Apriori(int min_sup)
         float progress_length = database.size();
         if (progress_length == 0)
             progress_length = 1;
-        
+
         // 用于打印 执行 进度
         printf("%.2f %%", 100 * progress_count / progress_length);
 
@@ -197,9 +168,8 @@ int DataBase::Apriori(int min_sup)
             printf("\r");
             printf("%.2f %%", 100 * progress_count / progress_length);
             fflush(stdout);
-            for(auto&& i : frequent_set)
-            {
-                if(includes(j.item_set.begin(), j.item_set.end(), i.first.begin(), i.first.end())){
+            for (auto&& i : frequent_set) {
+                if (includes(j.item_set.begin(), j.item_set.end(), i.first.begin(), i.first.end())) {
                     frequent_set[i.first] += 1;
                 }
             }
@@ -238,7 +208,8 @@ int DataBase::print(const CandidateSet& candset) const
     }
     return 1;
 }
-int DataBase::print(const vector<pair<string,int>>& candset)const{
+int DataBase::print(const vector<pair<string, int>>& candset) const
+{
     for (auto&& i : candset) {
         cout << i.first;
         cout << " ";
@@ -246,80 +217,171 @@ int DataBase::print(const vector<pair<string,int>>& candset)const{
     }
     return 1;
 }
-
+int DataBase::buildFP_growthTree(int min_sup)
+{
+    this->min_sup = min_sup;
+    buildFP_growthTree(getRoot());
+    printtree(fptree_root,0);
+}
 /**以下是 FPgrowth 算法的实现;
 */
-int DataBase:: buildFP_growthTree(FPTreeNode* node){
-    assert(node != nullptr);
-    for(auto&& i : database)
-    {
+int DataBase::buildFP_growthTree(FPTreeNode* node)
+{
+    assert(node != nullptr && min_sup != 0);
+
+    CandidateKey::iterator it1, it2;
+
+    vector<DataItem>::iterator datait2 = database.begin(),datait1 = datait2;
+    for (; datait1 != database.end();) {
+
+        for (it1 = datait1->item_set.begin(); it1 != datait1->item_set.end();) {
+            if (initialize[*it1] < min_sup) {
+                it1 = datait1->item_set.erase(it1);
+            }
+            else{
+                it1++;
+            }
+        }
+        if(datait1->item_set.size() < 1){
+            datait1 = database.erase(datait1);
+        }
+        else{
+            datait1++;
+        }
+    }
+    for (auto&& i : database) {
+        // 先 将 database 中的Trans的 不满足最小支持度的条目删除
+
         sort(i.item_set.begin(),
             i.item_set.end(),
-            [&](string& s1, string& s2) -> bool { return initialize[s1] > initialize[s2]; });
+            [&](string& s1, string& s2) -> bool { return (initialize[s1] > initialize[s2])|| (initialize[s1] == initialize[s2] && s1 < s2) ; });//|| (initialize[s1] == initialize[s2] && s1 < s2)
+
         // 调用此程序来将每个 Trans 加入到FP 树中
-        buildFP_growthTree_SubProcess(node, i.item_set.begin(),i.item_set.end(),this->item_table);
+        buildFP_growthTree_SubProcess(node, i.item_set.begin(), i.item_set.end(), this->item_table);
     }
     cout << "建树完成" << endl;
 }
-int DataBase:: buildcondTree(FPTreeNode* node,CandidateSet& condpat,vector<ItemTableElement>& local_itemtable){
+int DataBase::buildcondTree(FPTreeNode* node, CandidateSet& condpat, vector<ItemTableElement>& local_itemtable)
+{
     assert(node != nullptr);
-    for(auto&& i : condpat)
-    {
+    for (auto&& i : condpat) {
         //sort(i.item_set.begin(),
         //    i.item_set.end(),
         //   [&](string& s1, string& s2) -> bool { return initialize[s1] > initialize[s2]; });
         // 调用此程序来将每个 Trans 加入到FP 树中
         CandidateKey s = i.first;
-        buildFP_growthTree_SubProcess(node, s.begin(), s.end(),local_itemtable);
+        buildFP_growthTree_SubProcess(node, s.begin(), s.end(), local_itemtable);
     }
-    cout << "建树完成" << endl;
+    // cout << "建条件模式树完成" << endl;
 }
-int DataBase::FP_growth(){
-    if(fptree_root == nullptr){
+int DataBase::FP_growth()
+{
+    if (fptree_root == nullptr) {
         buildFP_growthTree(fptree_root);
     }
+
     //TODO: 需要完成 FP-growth 树的挖掘
     assert(fptree_root != nullptr);
+
     CandidateKey test;
-    test.push_back("null");
-    FP_growth_subprocess(fptree_root, test);
+    // test.push_back("null");
+    FP_growth_subprocess(fptree_root, test, this->item_table);
+
+    print(good_frequent_set);
+    return 1;
 }
-int DataBase::FP_growth_subprocess(FPTreeNode* localroot,CandidateKey alpha){
+int DataBase::FP_growth_subprocess(FPTreeNode* localroot, CandidateKey alpha, vector<ItemTableElement>& item_table)
+{
     assert(localroot != nullptr);
-    if(checkOnePath(localroot)){
+    //对 item_table 排序
+    sort(item_table.begin(),
+        item_table.end(), [](ItemTableElement s1, ItemTableElement s2) -> bool { return s1.supply < s2.supply; });
+    // for(auto&& i : item_table)
+    // {
+    //     cout << i.item_name << " " << i.supply << endl;
+
+    // }
+    // return 1;
+    if (checkOnePath(localroot)) {
         // tree 包含单个路径
         //去这个路径上的每个组合，与 alpha 取并，其支持度是这个组合中的各项支持度的最小值
-    }
-    else{
+        // cout << "welcome " << alpha.size()<<endl;
+        // printtree(localroot, 0);
+        // for (auto&& i : item_table) {
+        //     cout << i.item_name << " " << i.supply << endl;
+        // }
+        // for(auto&& i : alpha)
+        // {
+        //     cout << i << endl;
+        // }
+        return 1;
+    } else {
         // 遍历 树 localroot 中的项头表，为每一项都生成它的 条件模式基
-        // cout << item_table.size() << endl;
-        // return 1;
+        float progress_count = 0.0;
+        float progress_length = item_table.size();
+        if (localroot == fptree_root) {
+
+            if (progress_length == 0)
+                progress_length = 1;
+            printf("%.2f %%", 100 * progress_count / progress_length);
+        }
         for (auto&& i : item_table) {
-            CandidateSet condpat;//项头表中某一个 项的所有条件模式基 的集合
+            if (localroot == fptree_root) {
+                progress_count += 1;
+                printf("\r");
+                printf("%.2f %%", 100 * progress_count / progress_length);
+                fflush(stdout);
+            }
+
+            alpha.insert(alpha.begin(), i.item_name);
+            if (alpha.size() > 2) {
+                good_frequent_set[alpha] = i.supply;
+            }
+
+            CandidateSet condpat; //项头表中某一个 项的所有条件模式基 的集合
+            CandidateKey conditem_name;
+
             for (auto&& j : i.fp_treenode_chains) {
-                CandidateKey conditem_name;
-                FPTreeNode* it = j;
-                for (; it->getItemName() != "null";it = it->parent){
+                conditem_name.clear();
+                FPTreeNode* it = j->parent;
+                for (; it->getItemName() != "null"; it = it->parent) {
                     conditem_name.insert(conditem_name.begin(), it->getItemName());
                 }
                 // 得到的 conditem_name 默认是已排好序的
-                condpat[conditem_name] = j->getSupply();
+                if (conditem_name.size() > 0) {
+                    condpat[conditem_name] = j->getSupply();
+                }
             }
             // print(condpat);
             // break;
-            //此时获得一个项的所有条件模式基 condpat,再给它创建一个条件模式树:
+            //此时获得一个项的所有条件模式基 condpat,再给它创建一个条件模式树 和 这个树的项头表
             FPTreeNode* condroot = new FPTreeNode("null");
             vector<ItemTableElement> local_itemtable;
-            buildcondTree(condroot, condpat,local_itemtable);
-            printtree(condroot,0);
-            break;
+            buildcondTree(condroot, condpat, local_itemtable);
+
+            //递归对这个条件模式基做同样的处理 ：
+
+            // printtree(condroot,0);
+
+            FP_growth_subprocess(condroot, alpha, local_itemtable);
+
+            // for(auto&& m : local_itemtable)
+            // {
+            //     cout << m.item_name << " " << m.supply << endl;
+            // }
+            alpha.erase(alpha.begin());
+            // break;
+        }
+        if (localroot == fptree_root) {
+            printf("\n");
         }
     }
 }
-bool DataBase::checkOnePath(FPTreeNode* root){
+bool DataBase::checkOnePath(FPTreeNode* root)
+{
     assert(root != nullptr);
-    for (; root != nullptr;root++){
-        if(root->sibling != nullptr){
+    for (; root != nullptr; root = root->child) {
+        if (root->sibling != nullptr) {
             return false;
         }
     }
@@ -328,83 +390,85 @@ bool DataBase::checkOnePath(FPTreeNode* root){
 /** 这是 将要递归的程序:
  * @param node: 当前的树节点(位置)
  * @param item: 处理 Trans 的一个 item
- */  
-int DataBase::buildFP_growthTree_SubProcess(FPTreeNode* node, CandidateKey::iterator item_iter,CandidateKey::iterator item_end,vector<ItemTableElement>& item_table){
+ */
+int DataBase::buildFP_growthTree_SubProcess(FPTreeNode* node, CandidateKey::iterator item_iter, CandidateKey::iterator item_end, vector<ItemTableElement>& item_table)
+{
     assert(node != nullptr);
-    if(item_iter == item_end){  //某一个 Trans 的所有项都处理完成了
-        return 1;   
+    if (item_iter == item_end) { //某一个 Trans 的所有项都处理完成了
+        return 1;
     }
     assert(item_iter != item_end);
     FPTreeNode* child = node->child;
-    if(child == nullptr){
+    if (child == nullptr) {
         // node->child = new FPTreeNode(*item_iter);
         addchild(node, *item_iter);
         node->child->addSupply();
 
-        addItemAddress2ItemTable(*item_iter, node->child,item_table);
+        addItemAddress2ItemTable(*item_iter, node->child, item_table);
 
-        buildFP_growthTree_SubProcess(node->child, ++item_iter, item_end,item_table);
-    }
-    else{ // 在node 的孩子节点上找 到与当前项(item)相同的节点
+        buildFP_growthTree_SubProcess(node->child, ++item_iter, item_end, item_table);
+    } else { // 在node 的孩子节点上找 到与当前项(item)相同的节点
         // vector<string>::iterator it = item_iter;
-        FPTreeNode* sibling = child,*cur = child;
+        FPTreeNode *sibling = child, *cur = child;
         //在这一层查找 符合条件的节点
         while (sibling != nullptr && sibling->getItemName() != *item_iter) {
             cur = sibling;
             sibling = sibling->sibling;
         }
-        if(sibling == nullptr){  // 说明这一层没有对应的节点，cur 是这一层最后一个节点, 应该再建一个兄弟节点
+        if (sibling == nullptr) { // 说明这一层没有对应的节点，cur 是这一层最后一个节点, 应该再建一个兄弟节点
             addsibling(cur, *item_iter);
 
             assert(cur->sibling != nullptr);
             cur->sibling->addSupply();
-            addItemAddress2ItemTable(*item_iter, cur->sibling,item_table);
+            addItemAddress2ItemTable(*item_iter, cur->sibling, item_table);
 
-            buildFP_growthTree_SubProcess(cur->sibling, ++item_iter, item_end,item_table);
-        }
-        else{  //这一层找到了对应的节点
+            buildFP_growthTree_SubProcess(cur->sibling, ++item_iter, item_end, item_table);
+        } else { //这一层找到了对应的节点
             sibling->addSupply();
-            addItemAddress2ItemTable(*item_iter, sibling,item_table);
-            buildFP_growthTree_SubProcess(sibling, ++item_iter, item_end,item_table);
+            addItemAddress2ItemTable(*item_iter, sibling, item_table);
+            buildFP_growthTree_SubProcess(sibling, ++item_iter, item_end, item_table);
         }
     }
     return 1;
 }
-void DataBase::printtree(FPTreeNode* node,int layer){
-    if(node == nullptr){
+void DataBase::printtree(FPTreeNode* node, int layer)
+{
+    if (node == nullptr) {
         return;
     }
     assert(node != nullptr);
 
-    for (int i = 0; i < layer;i++){
+    for (int i = 0; i < layer; i++) {
         cout << " ";
     }
     cout << node->getItemName() << "(" << node->getSupply() << ")" << endl;
 
     FPTreeNode* it = node->child;
-    for (; it != nullptr;it = it->sibling){
+    for (; it != nullptr; it = it->sibling) {
         printtree(it, layer + 2);
     }
     // cout << endl;
 }
-int DataBase::addsibling(FPTreeNode* p, string& item_name){
+int DataBase::addsibling(FPTreeNode* p, string& item_name)
+{
     assert(p->sibling == nullptr);
     p->sibling = new FPTreeNode(item_name);
 
     p->sibling->parent = p->parent;
     return 1;
 }
-int DataBase::addchild(FPTreeNode* p, string& item_name){
+int DataBase::addchild(FPTreeNode* p, string& item_name)
+{
     assert(p->child == nullptr);
     p->child = new FPTreeNode(item_name);
 
     p->child->parent = p;
     return 1;
 };
-int DataBase::addItemAddress2ItemTable(string& item_name, FPTreeNode* address,vector<ItemTableElement>& item_table){
-    for(auto&& i : item_table)
-    {
-        if(i.item_name == item_name){
+int DataBase::addItemAddress2ItemTable(string& item_name, FPTreeNode* address, vector<ItemTableElement>& item_table)
+{
+    for (auto&& i : item_table) {
+        if (i.item_name == item_name) {
             // i.fp_treenode_chains.push_back(address);
             i.fp_treenode_chains.push_back(address);
             i.supply++;
@@ -416,4 +480,10 @@ int DataBase::addItemAddress2ItemTable(string& item_name, FPTreeNode* address,ve
     item_table.push_back(ItemTableElement(item_name));
     item_table.rbegin()->fp_treenode_chains.push_back(address);
     return 1;
+}
+int DataBase::print_database() const
+{
+    for (auto i : database) {
+        cout << i;
+    }
 }

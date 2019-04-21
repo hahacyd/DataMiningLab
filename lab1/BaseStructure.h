@@ -44,7 +44,7 @@ private:
 class DataBase {
 public:
 //TODO: load 的项集 必须是已排序
-    DataBase():fptree_root(nullptr){
+    DataBase():min_sup(0),fptree_root(nullptr){
         fptree_root = new FPTreeNode("null");
     }
     virtual int load(string filename)=0;
@@ -54,28 +54,37 @@ public:
     int apriori_gen(CandidateSet& L);   //
     bool has_infrequent_subset(CandidateKey cand, CandidateSet& container);
     int Apriori(int min_sup);
-    int print(const CandidateSet&)const;
-    int print(const vector<pair<string, int> >& candset) const;
 
+
+    int buildFP_growthTree(int min_sup);
     int FP_growth();
-    int FP_growth_subprocess(FPTreeNode* localroot, CandidateKey alpha);
+    int FP_growth_subprocess(FPTreeNode* localroot, CandidateKey alpha,vector<ItemTableElement>& item_table);
     bool checkOnePath(FPTreeNode* root);
     int buildFP_growthTree(FPTreeNode* node);
     int buildFP_growthTree_SubProcess(FPTreeNode* node, vector<string>::iterator item_iter,vector<string>::iterator item_end,vector<ItemTableElement>& item_table);
+    
     int addsibling(FPTreeNode* p, string& item_name);
     int addchild(FPTreeNode* p, string& item_name);
-    void printtree(FPTreeNode* node, int layer);
+    
     int addItemAddress2ItemTable(string& item_name, FPTreeNode* address,vector<ItemTableElement>& item_table);
     int buildcondTree(FPTreeNode* node, CandidateSet& condpat,vector<ItemTableElement>& local_itemtable);
+    
+    int print(const CandidateSet&)const;
+    int print(const vector<pair<string, int> >& candset) const;
+    int print_database() const;
+    void printtree(FPTreeNode* node, int layer);
     FPTreeNode* getRoot()
     {
         return fptree_root;
     }
  
 protected:
+    int min_sup;
     map<string, int> initialize;
-
+    
     CandidateSet frequent_one_set; //初始 集合
+    CandidateSet good_frequent_set; //最终集合,包含各个达到最小支持度 的频繁项集的集合
+
     vector<pair<string, int>> vfrequent_one_set;
     vector<DataItem> database;
     vector<ItemTableElement> item_table;
