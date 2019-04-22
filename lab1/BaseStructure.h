@@ -73,6 +73,8 @@ public:
     int print(const CandidateSet&) const;
     int print(const vector<pair<string, int> >& candset) const;
     void printtree(FPTreeNode* node, int layer);
+
+    void printResult();
     FPTreeNode* getRoot()
     {
         return fptree_root;

@@ -11,7 +11,7 @@
 int DataBase::apriori_gen(CandidateSet& L)
 {
     // 自动在 L 中的 k - 1 频繁项集 自连接 生成 k 项频繁项集
-    assert(L.size() > 0);
+    // assert(L.size() > 0);
     int length = L.begin()->first.size();
     CandidateKey intersect_result, union_result;
     CandidateSet candidate_set;
@@ -34,7 +34,7 @@ int DataBase::apriori_gen(CandidateSet& L)
             if (intersect_result.size() >= length - 1) { //&& *(it1_end - 1) < *(it2_end - 1)
                 // 这里 candidate 中的项集 中的项自然是有序的，这是 set_union 所决定的
                 set_union(i.first.begin(), i.first.end(), j.first.begin(), j.first.end(), std::back_inserter(union_result));
-
+                sortItem(union_result);
                 candidate_set[union_result] = 0;
             }
         }
@@ -61,15 +61,9 @@ bool DataBase::has_infrequent_subset(CandidateKey cand, CandidateSet& container)
     int item_num = cand.size();
 
     // 假设 cand 是一个k 项集，那么要产生 k - 2 个 k - 1项集
-    // CandidateKey::iterator cand_itend = cand.end() - 2,cand_itbegin = cand.begin();
-    // cand.erase()
     CandidateKey candkey;
     candkey.assign(cand.begin(), cand.end());
     CandidateKey temp = candkey;
-
-    
-    // temp.erase()
-    // vector<CandidateKey> alternativeSet;
 
     // CandidateKey::iterator it = 
     for (auto&& i : candkey) {
@@ -94,7 +88,7 @@ int DataBase::Apriori(int min_sup)
     CandidateSet frequent_set = frequent_one_set;
     for (int k = 1; frequent_set.size() != 0; k++) {
         int test = apriori_gen(frequent_set);
-        assert(k == test);
+        // assert(k == test);
         // 检验 apriori_gen 产生的候选项集是否在 原始数据集中，
         float progress_count = 0.0;
         float progress_length = dataset.size();
@@ -102,12 +96,12 @@ int DataBase::Apriori(int min_sup)
             progress_length = 1;
 
         // 用于打印 执行 进度
-        printf("%.2f %%", 100 * progress_count / progress_length);
+        printf("正在挖掘 %d 项集 : %.2f %%",k+1, 100 * progress_count / progress_length);
 
         for (auto&& j : dataset) { //从 数据库 中筛查 候选项集 frequent_set 中每个频繁项集的出现次数,
             progress_count += 1;
             printf("\r");
-            printf("%.2f %%", 100 * progress_count / progress_length);
+            printf("正在挖掘 %d 项集 : %.2f %%",k+1, 100 * progress_count / progress_length);
             fflush(stdout);
             for (auto&& i : frequent_set) {
                 if (includes(j.first.begin(), j.first.end(), i.first.begin(), i.first.end())) {
@@ -115,10 +109,8 @@ int DataBase::Apriori(int min_sup)
                 }
             }
         }
-
-        printf("\n");
+        printf(" 完成 \n");
         //将 frequent_set 中小于 最小支持度的 频繁项集 删除
-        // CandidateSet::iterator ittemp;
         for (CandidateSet::iterator it = frequent_set.begin(); it != frequent_set.end();) {
             // int freq = it->second;
             if (it->second < min_sup) {
@@ -129,7 +121,7 @@ int DataBase::Apriori(int min_sup)
         }
 
         print(frequent_set);
-        printf(" %d 项集收集完毕 \n", k + 1);
+        // printf(" %d 项集收集完毕 \n", k + 1);
         good_frequent_set.insert(frequent_set.begin(), frequent_set.end());
 
         progress_count = 0;
@@ -139,20 +131,17 @@ int DataBase::Apriori(int min_sup)
 
 int DataBase::sortItem(CandidateKey& s)
 {
-    // s.sort(s.begin(),
-    //     s.end(),
-    //     [&](string& s1, string& s2) -> bool { return (initialize[s1] > initialize[s2]) || (initialize[s1] == initialize[s2] && s1 < s2); }); //|| (initialize[s1] == initialize[s2] && s1 < s2)
     s.sort([&](string& s1, string& s2) -> bool { return (initialize[s1] > initialize[s2])
                                                      || (initialize[s1] == initialize[s2] && s1 < s2); });
 };
 int DataBase::createFPtree(FPTreeNode* node, list<pair<CandidateKey, int>>& prefix_path,vector<ItemTableElement>& headpoint_table)
 {
-    assert(node != nullptr);
+    // assert(node != nullptr);
     // vector<ItemTableElement> local_itemtable;
     for (auto&& i : prefix_path) {
         // 调用此程序来将每个 Trans 加入到FP 树中
-        CandidateKey s = i.first;
-        buildFPtree(node, s.begin(), s.end(), headpoint_table, i.second);
+        // CandidateKey s = i.first;
+        buildFPtree(node, i.first.begin(), i.first.end(), headpoint_table, i.second);
     }
     return 1;
 }
@@ -187,7 +176,7 @@ int DataBase::FP_growth(int support)
     // buildFP_growthTree(support);
     createFPtree(this->fptree_root, dataset,this->item_table);
     // printtree(fptree_root, 0);
-    // cout << "结束" << deletecount <<endl;
+    // cout << "结束" << deletecount <<"数据集大小 "<<dataset.size() <<endl;
     // return 1;
 
     // assert(fptree_root != nullptr);
@@ -199,7 +188,7 @@ int DataBase::FP_growth(int support)
     destroyTree(fptree_root);
     fptree_root = nullptr;
 
-    print(good_frequent_set);
+    
     return 1;
 }
 void DataBase::destroyTree(FPTreeNode* root)
@@ -220,13 +209,13 @@ static list<pair<CandidateKey, int>> prefix_path; //获取前缀路径
 
 int DataBase::minFPtree(FPTreeNode* localroot, CandidateKey& alpha, vector<ItemTableElement>& item_table)
 {
-    assert(localroot != nullptr);
-    if(item_table.size() == 1 && alpha.size() >= 1 && item_table.begin()->supply >= min_sup){
-        alpha.push_front(item_table.begin()->item_name);
-        good_frequent_set[alpha] = item_table.begin()->supply;
-        alpha.pop_front();
-        return 1;
-    }
+    // assert(localroot != nullptr);
+    // if(item_table.size() == 1 && alpha.size() >= 1 && item_table.begin()->supply >= min_sup){
+    //     alpha.push_front(item_table.begin()->item_name);
+    //     good_frequent_set[alpha] = item_table.begin()->supply;
+    //     alpha.pop_front();
+    //     return 1;
+    // }
     // if (localroot->child == nullptr) {
     //     return 1;
     // }
@@ -307,11 +296,12 @@ int DataBase::minFPtree(FPTreeNode* localroot, CandidateKey& alpha, vector<ItemT
  */
 int DataBase::buildFPtree(FPTreeNode* node, CandidateKey::iterator item_iter, CandidateKey::iterator item_end, vector<ItemTableElement>& item_table, int supply)
 {
-    assert(node != nullptr);
+    // assert(node != nullptr);
     if (item_iter == item_end) { //某一个 Trans 的所有项都处理完成了
         return 1;
     }
-    assert(item_iter != item_end);
+
+    // assert(item_iter != item_end);
     FPTreeNode* child = node->child;
     if (child == nullptr) {
         // node->child = new FPTreeNode(*item_iter);
@@ -332,11 +322,11 @@ int DataBase::buildFPtree(FPTreeNode* node, CandidateKey::iterator item_iter, Ca
         if (sibling == nullptr) { // 说明这一层没有对应的节点，cur 是这一层最后一个节点, 应该再建一个兄弟节点
             addsibling(cur, *item_iter);
 
-            assert(cur->sibling != nullptr);
+            // assert(cur->sibling != nullptr);
             cur->sibling->addSupply(supply);
             addItemAddress2ItemTable(*item_iter, cur->sibling, item_table, supply);
 
-            buildFPtree(cur->sibling, ++item_iter, item_end, item_table, supply);
+            buildFPtree(cur->sibling,++item_iter, item_end, item_table, supply);
         } else { //这一层找到了对应的节点
             sibling->addSupply(supply);
             addItemAddress2ItemTable(*item_iter, sibling, item_table, supply);
@@ -350,7 +340,7 @@ void DataBase::printtree(FPTreeNode* node, int layer)
     if (node == nullptr) {
         return;
     }
-    assert(node != nullptr);
+    // assert(node != nullptr);
 
     for (int i = 0; i < layer; i++) {
         cout << " ";
@@ -365,7 +355,7 @@ void DataBase::printtree(FPTreeNode* node, int layer)
 }
 int DataBase::addsibling(FPTreeNode* p, string& item_name)
 {
-    assert(p->sibling == nullptr);
+    // assert(p->sibling == nullptr);
     p->sibling = new FPTreeNode(item_name);
 
     p->sibling->parent = p->parent;
@@ -373,7 +363,7 @@ int DataBase::addsibling(FPTreeNode* p, string& item_name)
 }
 int DataBase::addchild(FPTreeNode* p, string& item_name)
 {
-    assert(p->child == nullptr);
+    // assert(p->child == nullptr);
     p->child = new FPTreeNode(item_name);
 
     p->child->parent = p;
@@ -415,4 +405,7 @@ int DataBase::print(const vector<pair<string, int>>& candset) const
         cout << i.second << endl;
     }
     return 1;
+}
+void DataBase::printResult(){
+    print(good_frequent_set);
 }

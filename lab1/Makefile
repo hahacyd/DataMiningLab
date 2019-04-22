@@ -3,7 +3,7 @@ ifndef GXX
 endif
 
 ifndef CXXFLAGS
-	CXXFLAGS :=   -std=c++11 -pg -g -O2 # 
+	CXXFLAGS := -std=c++11 -g -O2 #-pg   # 
 endif
 
 CxxSources := $(shell find ./ -name "*.cpp" ) #自动寻找当前目录下的源文件
@@ -25,4 +25,4 @@ analysize:$(Objs)
 
 clean:
 	@echo $(CxxSources)
-	rm build $(CxxSources:.cpp=.d) $(CxxSources:.cpp=.o) 
+	rm $(CxxSources:.cpp=.d) $(CxxSources:.cpp=.o) 
