@@ -10,7 +10,7 @@
 
 /**
  * 1 使用迭代的方法基于候选 找出频繁项集
- */
+ */ 
 int DataBase::apriori_gen(CandidateSet& L)
 {
     // 自动在 L 中的 k - 1 频繁项集 自连接 生成 k 项频繁项集
