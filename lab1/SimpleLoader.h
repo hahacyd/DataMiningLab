@@ -9,6 +9,8 @@
 using namespace std;
 
 typedef vector<string> CandidateKey;
+// typedef list<string> CandidateKey;
+
 
 class DataItem {
 public:
@@ -18,7 +20,7 @@ public:
         return 1;
     }
     friend ostream& operator<<(ostream& out, DataItem& item);
-    vector<string> item_set;
+    CandidateKey item_set;
     private:
         int transaction_no;
         
@@ -28,8 +30,8 @@ public:
 };
 ostream& operator<<(ostream& out, DataItem& item);
 vector<DataItem> readGroceryDataSet(string filename);
-vector<string> get_comma_str(string& str);
-vector<string> linesplit(string str, string delime);
+CandidateKey get_comma_str(string& str);
+CandidateKey linesplit(string str, string delime);
 
 class UserComandHistory{
 public:
@@ -37,7 +39,7 @@ public:
     int push_back(string str);
     friend ostream& operator<<(ostream& out, UserComandHistory& comandhistory);
 private:
-    vector<string> comands;
+    CandidateKey comands;
 };
 vector<UserComandHistory> readUnixUsageDataSet(string filename);
 ostream& operator<<(ostream& out, UserComandHistory& comandhistory);

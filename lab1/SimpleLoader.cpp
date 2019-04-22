@@ -60,10 +60,10 @@ int DataItem::load(string str)
     // cout << endl;
     return 1;
 }
-vector<string> linesplit(string str, string split_str)
+CandidateKey linesplit(string str, string split_str)
 {
     int i = 0;
-    vector<string> items;
+    CandidateKey items;
 
     unsigned int pos_start = 0, pos_end = 0;
     int length = str.length();

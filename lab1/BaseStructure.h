@@ -7,7 +7,7 @@
 using namespace std;
 
 typedef set<string> FrequentItem ;
-typedef vector<string> CandidateKey;
+// typedef vector<string> CandidateKey;
 typedef map<CandidateKey, int> CandidateSet;
 
 class ItemTableElement;
@@ -26,8 +26,8 @@ public:
     //     sibling = nullptr;
     //     parent = nullptr; 
     // }
-    int addSupply(){
-        supply++;
+    int addSupply(int support){
+        supply += support;
     }
     int getSupply(){
         return supply;
@@ -58,18 +58,19 @@ public:
     int sortItem(CandidateKey& s);
     int buildFP_growthTree(int min_sup);
     int FP_growth();
-    int FP_growth_subprocess(FPTreeNode* localroot, CandidateKey alpha,vector<ItemTableElement>& item_table);
+    int minFPtree(FPTreeNode* localroot, CandidateKey& alpha,vector<ItemTableElement>& item_table);
     bool checkOnePath(FPTreeNode* root);
     int buildFP_growthTree(FPTreeNode* node);
-    int buildFP_growthTree_SubProcess(FPTreeNode* node, vector<string>::iterator item_iter,vector<string>::iterator item_end,vector<ItemTableElement>& item_table);
-    
+    int buildFPtree(FPTreeNode* node, CandidateKey::iterator item_iter,CandidateKey::iterator item_end,vector<ItemTableElement>& item_table,int supply);
+    vector<ItemTableElement> buildcondTree(FPTreeNode* node, vector<pair<CandidateKey,int>>& prefix_path);
+
     int addsibling(FPTreeNode* p, string& item_name);
     int addchild(FPTreeNode* p, string& item_name);
     
-    int addItemAddress2ItemTable(string& item_name, FPTreeNode* address,vector<ItemTableElement>& item_table);
-    int buildcondTree(FPTreeNode* node, CandidateSet& condpat,vector<ItemTableElement>& local_itemtable);
-    
-    int print(const CandidateSet&)const;
+    int addItemAddress2ItemTable(string& item_name, FPTreeNode* address,vector<ItemTableElement>& item_table,int support);
+
+    void destroyTree(FPTreeNode* root);
+    int print(const CandidateSet&) const;
     int print(const vector<pair<string, int> >& candset) const;
     int print_database() const;
     void printtree(FPTreeNode* node, int layer);
@@ -84,7 +85,7 @@ protected:
     
     CandidateSet frequent_one_set; //初始 集合
     CandidateSet good_frequent_set; //最终集合,包含各个达到最小支持度 的频繁项集的集合
-
+    list<pair<CandidateKey, int>> FPresult;
     vector<pair<string, int>> vfrequent_one_set;
     vector<DataItem> database;
     vector<ItemTableElement> item_table;
@@ -110,9 +111,9 @@ class UnixUserDataBase:public DataBase{
 class ItemTableElement {
 public:
     ItemTableElement(string name)
-        : item_name(name),supply(1){};
+        : item_name(name),supply(0){};
     // private:
     int supply;
     string item_name;
-    vector<FPTreeNode*> fp_treenode_chains; //记录 FPTree_growth 树中相同 项的位置
+    set<FPTreeNode*> fp_treenode_chains; //记录 FPTree_growth 树中相同 项的位置
 };
