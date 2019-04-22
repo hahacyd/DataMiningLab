@@ -1,5 +1,6 @@
 // #include"SimpleLoader.h"
 #include"BaseStructure.h"
+#include"GroceryStore.h"
 #include<string>
 #include<vector>
 #include<list>
@@ -20,8 +21,7 @@ int main(int argv,char** argc)
     // DataBase database;
 
     GroceryDataBase grocerybase(filepath);
-    cout << grocerybase.size();
-    cout << " 个样例" << endl;
+    // cout << grocerybase.size() << " 个样例" << endl;
     // grocerybase.Apriori(100);
     // grocerybase.buildFP_growthTree(200);
     // grocerybase.print_database();

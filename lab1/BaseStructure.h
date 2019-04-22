@@ -1,3 +1,4 @@
+#pragma once
 #include<vector>
 #include<list>
 #include<map>
@@ -11,7 +12,6 @@ typedef set<string> FrequentItem ;
 typedef map<CandidateKey, int> CandidateSet;
 
 class ItemTableElement;
-class FPTreeNode;
 class FPTreeNode {
 public:
     FPTreeNode(string name)
@@ -49,7 +49,7 @@ public:
     }
     virtual int load(string filename)=0;
     int size(){
-        return database.size();
+        return dataset.size();
     }
     int apriori_gen(CandidateSet& L);   //
     bool has_infrequent_subset(CandidateKey cand, CandidateSet& container);
@@ -62,7 +62,7 @@ public:
     bool checkOnePath(FPTreeNode* root);
     int buildFP_growthTree(FPTreeNode* node);
     int buildFPtree(FPTreeNode* node, CandidateKey::iterator item_iter,CandidateKey::iterator item_end,vector<ItemTableElement>& item_table,int supply);
-    vector<ItemTableElement> createFPtree(FPTreeNode* node, vector<pair<CandidateKey,int>>& prefix_path);
+    vector<ItemTableElement> createFPtree(FPTreeNode* node, list<pair<CandidateKey,int>>& prefix_path);
 
     int addsibling(FPTreeNode* p, string& item_name);
     int addchild(FPTreeNode* p, string& item_name);
@@ -90,23 +90,12 @@ protected:
     vector<DataItem> database;
     vector<ItemTableElement> item_table;
     FPTreeNode* fptree_root;
+
+    list<pair<CandidateKey, int>> dataset;
 };
 
-class GroceryDataBase:public DataBase{
-    public:
-        int load(string filename);
-        GroceryDataBase(string filename){
-            load(filename);
-        }
-    private:
-};
-class UnixUserDataBase:public DataBase{
-    public:
-        int load(string filename);
-        UnixUserDataBase(string filename){
-            load(filename);
-        }
-};
+
+
 
 class ItemTableElement {
 public:

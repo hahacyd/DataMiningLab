@@ -8,7 +8,7 @@
 #include<iostream>
 using namespace std;
 
-typedef vector<string> CandidateKey;
+typedef list<string> CandidateKey;
 // typedef list<string> CandidateKey;
 
 
