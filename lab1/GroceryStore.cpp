@@ -62,9 +62,18 @@ int GroceryDataBase::load(string filename)
         for (auto&& j : i.first) {
             initialize[j]++;
         }
+    }
+    // for(auto&& i : initialize)
+    // {
+    //     cout << i.first << " " << i.second << endl;
+    // }
+    // exit(-1);
+    // 排序每个条目:
+    for(auto&& i : dataset)
+    {
         sortItem(i.first);
     }
-
+    
     // 生成 1 频繁项集
     CandidateKey onetemp;
     for (auto&& i : initialize) {

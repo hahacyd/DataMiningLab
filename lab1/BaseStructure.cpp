@@ -5,9 +5,6 @@
 #include <stdio.h>
 #include <sstream>
 // using namespace std;
-
-
-
 /**
  * 1 使用迭代的方法基于候选 找出频繁项集
  */ 
@@ -22,6 +19,9 @@ int DataBase::apriori_gen(CandidateSet& L)
     // 连接步
     for (auto&& i : L) {
         for (auto&& j : L) {
+            if(i.first == j.first){
+                continue;
+            }
             intersect_result.clear();
             union_result.clear();
 
@@ -48,6 +48,7 @@ int DataBase::apriori_gen(CandidateSet& L)
         }
     }
     // print(candidate_set);
+    // exit(-1);
     L.swap(candidate_set); // 交换 输入集合 与 输出集合,减少返回时的 复制开销
     return length;
 }
@@ -117,13 +118,11 @@ int DataBase::Apriori(int min_sup)
 
         printf("\n");
         //将 frequent_set 中小于 最小支持度的 频繁项集 删除
-        CandidateSet::iterator ittemp;
+        // CandidateSet::iterator ittemp;
         for (CandidateSet::iterator it = frequent_set.begin(); it != frequent_set.end();) {
-            int freq = it->second;
+            // int freq = it->second;
             if (it->second < min_sup) {
-                ittemp = it;
-                it++;
-                frequent_set.erase(ittemp);
+                it = frequent_set.erase(it);
             } else {
                 it++;
             }
@@ -222,6 +221,12 @@ static list<pair<CandidateKey, int>> prefix_path; //获取前缀路径
 int DataBase::minFPtree(FPTreeNode* localroot, CandidateKey& alpha, vector<ItemTableElement>& item_table)
 {
     assert(localroot != nullptr);
+    if(item_table.size() == 1 && alpha.size() >= 1 && item_table.begin()->supply >= min_sup){
+        alpha.push_front(item_table.begin()->item_name);
+        good_frequent_set[alpha] = item_table.begin()->supply;
+        alpha.pop_front();
+        return 1;
+    }
     // if (localroot->child == nullptr) {
     //     return 1;
     // }
@@ -288,11 +293,13 @@ int DataBase::minFPtree(FPTreeNode* localroot, CandidateKey& alpha, vector<ItemT
             // 树挖掘完毕后 回收空间，
             destroyTree(condroot);
         }
-        alpha.erase(alpha.begin());
+        // alpha.erase(alpha.begin());
+        alpha.pop_front();
     }
     if (localroot == fptree_root) {
         printf("\n");
     }
+    return 1;
 }
 /** 这是 将要递归的程序:
  * @param node: 当前的树节点(位置)
