@@ -1,16 +1,17 @@
 #pragma once
+#include<iostream>
 #include<vector>
 #include<list>
 #include<map>
+#include<set>
 #include<string>
-#include"SimpleLoader.h"
 #include"debug.h"
 using namespace std;
 
 typedef set<string> FrequentItem ;
-// typedef vector<string> CandidateKey;
+typedef list<string> CandidateKey;
 typedef map<CandidateKey, int> CandidateSet;
-
+class DataItem;
 class ItemTableElement;
 class FPTreeNode {
 public:
@@ -56,13 +57,12 @@ public:
     int Apriori(int min_sup);
 
     int sortItem(CandidateKey& s);
-    int buildFP_growthTree(int min_sup);
     int FP_growth(int support);
     int minFPtree(FPTreeNode* localroot, CandidateKey& alpha,vector<ItemTableElement>& item_table);
-    bool checkOnePath(FPTreeNode* root);
-    int buildFP_growthTree(FPTreeNode* node);
+    // bool checkOnePath(FPTreeNode* root);
+    // int buildFP_growthTree(FPTreeNode* node);
     int buildFPtree(FPTreeNode* node, CandidateKey::iterator item_iter,CandidateKey::iterator item_end,vector<ItemTableElement>& item_table,int supply);
-    vector<ItemTableElement> createFPtree(FPTreeNode* node, list<pair<CandidateKey,int>>& prefix_path);
+    int createFPtree(FPTreeNode* node, list<pair<CandidateKey,int>>& prefix_path,vector<ItemTableElement>& headpoint_table);
 
     int addsibling(FPTreeNode* p, string& item_name);
     int addchild(FPTreeNode* p, string& item_name);
@@ -72,7 +72,6 @@ public:
     void destroyTree(FPTreeNode* root);
     int print(const CandidateSet&) const;
     int print(const vector<pair<string, int> >& candset) const;
-    int print_database() const;
     void printtree(FPTreeNode* node, int layer);
     FPTreeNode* getRoot()
     {
@@ -94,9 +93,6 @@ protected:
     list<pair<CandidateKey, int>> dataset;
 };
 
-
-
-
 class ItemTableElement {
 public:
     ItemTableElement(string name)
@@ -105,4 +101,20 @@ public:
     int supply;
     string item_name;
     set<FPTreeNode*> fp_treenode_chains; //记录 FPTree_growth 树中相同 项的位置
+};
+class DataItem {
+public:
+    int load(string str); 
+    int push_back(string item){
+        item_set.push_back(item);
+        return 1;
+    }
+    friend ostream& operator<<(ostream& out, DataItem& item);
+    CandidateKey item_set;
+    private:
+        int transaction_no;
+        
+        // ~Transaction(){
+        //     item_set.clear();
+        // }
 };

@@ -1,5 +1,4 @@
 #include "BaseStructure.h"
-#include "SimpleLoader.h"
 #include "debug.h"
 #include <algorithm>
 #include <map>
@@ -67,8 +66,11 @@ bool DataBase::has_infrequent_subset(CandidateKey cand, CandidateSet& container)
     candkey.assign(cand.begin(), cand.end());
     CandidateKey temp = candkey;
 
+    
+    // temp.erase()
     // vector<CandidateKey> alternativeSet;
 
+    // CandidateKey::iterator it = 
     for (auto&& i : candkey) {
         temp.erase(find(temp.begin(), temp.end(), i));
         bool spaceX = 0;
@@ -77,7 +79,7 @@ bool DataBase::has_infrequent_subset(CandidateKey cand, CandidateSet& container)
                 spaceX = 1;
             }
         }
-        if (spaceX == 0) {
+        if (spaceX == 0) { //说明 原始数据中没有 这个频繁项，返回 不存在
             return 1;
         }
         temp.clear();
@@ -94,20 +96,20 @@ int DataBase::Apriori(int min_sup)
         assert(k == test);
         // 检验 apriori_gen 产生的候选项集是否在 原始数据集中，
         float progress_count = 0.0;
-        float progress_length = database.size();
+        float progress_length = dataset.size();
         if (progress_length == 0)
             progress_length = 1;
 
         // 用于打印 执行 进度
         printf("%.2f %%", 100 * progress_count / progress_length);
 
-        for (auto&& j : database) { //从 数据库 中筛查 候选项集 frequent_set 中每个频繁项集的出现次数,
+        for (auto&& j : dataset) { //从 数据库 中筛查 候选项集 frequent_set 中每个频繁项集的出现次数,
             progress_count += 1;
             printf("\r");
             printf("%.2f %%", 100 * progress_count / progress_length);
             fflush(stdout);
             for (auto&& i : frequent_set) {
-                if (includes(j.item_set.begin(), j.item_set.end(), i.first.begin(), i.first.end())) {
+                if (includes(j.first.begin(), j.first.end(), i.first.begin(), i.first.end())) {
                     frequent_set[i.first] += 1;
                 }
             }
@@ -144,16 +146,16 @@ int DataBase::sortItem(CandidateKey& s)
     s.sort([&](string& s1, string& s2) -> bool { return (initialize[s1] > initialize[s2])
                                                      || (initialize[s1] == initialize[s2] && s1 < s2); });
 };
-vector<ItemTableElement> DataBase::createFPtree(FPTreeNode* node, list<pair<CandidateKey, int>>& prefix_path)
+int DataBase::createFPtree(FPTreeNode* node, list<pair<CandidateKey, int>>& prefix_path,vector<ItemTableElement>& headpoint_table)
 {
     assert(node != nullptr);
-    vector<ItemTableElement> local_itemtable;
+    // vector<ItemTableElement> local_itemtable;
     for (auto&& i : prefix_path) {
         // 调用此程序来将每个 Trans 加入到FP 树中
         CandidateKey s = i.first;
-        buildFPtree(node, s.begin(), s.end(), local_itemtable, i.second);
+        buildFPtree(node, s.begin(), s.end(), headpoint_table, i.second);
     }
-    return local_itemtable;
+    return 1;
 }
 int DataBase::FP_growth(int support)
 {
@@ -184,12 +186,12 @@ int DataBase::FP_growth(int support)
 
     // 创建 FP 树
     // buildFP_growthTree(support);
-    this->item_table = createFPtree(this->fptree_root, dataset);
+    createFPtree(this->fptree_root, dataset,this->item_table);
     // printtree(fptree_root, 0);
     // cout << "结束" << deletecount <<endl;
     // return 1;
 
-    assert(fptree_root != nullptr);
+    // assert(fptree_root != nullptr);
 
     // 挖掘 FP 树
     CandidateKey backfix;
@@ -278,7 +280,7 @@ int DataBase::minFPtree(FPTreeNode* localroot, CandidateKey& alpha, vector<ItemT
         if (prefix_path.size() > 0) {
             FPTreeNode* condroot = new FPTreeNode("null");
             vector<ItemTableElement> local_itemtable;
-            local_itemtable = createFPtree(condroot, prefix_path);
+            createFPtree(condroot, prefix_path,local_itemtable);
             prefix_path.clear(); //建完树就没用了
             if (local_itemtable.size() > 0) {
                 minFPtree(condroot, alpha, local_itemtable);
@@ -370,6 +372,7 @@ int DataBase::addchild(FPTreeNode* p, string& item_name)
     p->child->parent = p;
     return 1;
 };
+
 int DataBase::addItemAddress2ItemTable(string& item_name, FPTreeNode* address, vector<ItemTableElement>& item_table, int support)
 {
     for (auto&& i : item_table) {
@@ -385,12 +388,6 @@ int DataBase::addItemAddress2ItemTable(string& item_name, FPTreeNode* address, v
     item_table.rbegin()->fp_treenode_chains.insert(address);
     item_table.rbegin()->supply += support;
     return 1;
-}
-int DataBase::print_database() const
-{
-    for (auto i : database) {
-        cout << i;
-    }
 }
 int DataBase::print(const CandidateSet& candset) const
 {

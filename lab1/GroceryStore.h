@@ -1,6 +1,6 @@
 #pragma once
 #include"BaseStructure.h"
-
+#include<string>
 using namespace std;
 
 class GroceryDataBase:public DataBase{

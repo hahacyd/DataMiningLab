@@ -22,10 +22,10 @@ int main(int argv,char** argc)
 
     GroceryDataBase grocerybase(filepath);
     // cout << grocerybase.size() << " 个样例" << endl;
-    // grocerybase.Apriori(100);
+    grocerybase.Apriori(100);
     // grocerybase.buildFP_growthTree(200);
     // grocerybase.print_database();
-    grocerybase.FP_growth(200);
+    // grocerybase.FP_growth(200);
     // vector<UserComandHistory> record = readUnixUsageDataSet(filepath);
 
     return 1;

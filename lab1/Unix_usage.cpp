@@ -1,4 +1,8 @@
 #include"Unix_usage.h"
+#include<sstream>
+#include<fstream>
+#include<iostream>
+#include<string>
 int UnixUserDataBase::load(string filename)
 {
     // vector<UserComandHistory> record;

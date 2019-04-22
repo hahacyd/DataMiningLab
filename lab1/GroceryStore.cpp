@@ -1,5 +1,8 @@
 #include"GroceryStore.h"
 #include<sstream>
+#include<fstream>
+#include<iostream>
+#include<string>
 int GroceryDataBase::load(string filename)
 {
     ifstream fp(filename.c_str());
@@ -59,6 +62,7 @@ int GroceryDataBase::load(string filename)
         for (auto&& j : i.first) {
             initialize[j]++;
         }
+        sortItem(i.first);
     }
 
     // 生成 1 频繁项集
