@@ -38,6 +38,7 @@ int GroceryDataBase::load(string filename)
             initialize[j]++;
         }
     }
+    
     CandidateKey onetemp;
     for (auto&& i : initialize) {
         onetemp.push_back(i.first);
@@ -275,7 +276,7 @@ int DataBase::sortItem(CandidateKey& s)
     // items.clear();
     // items.assign(s.begin(), s.end());
 };
-vector<ItemTableElement> DataBase::buildcondTree(FPTreeNode* node, vector<pair<CandidateKey,int>>& prefix_path)
+vector<ItemTableElement> DataBase::createFPtree(FPTreeNode* node, vector<pair<CandidateKey,int>>& prefix_path)
 {
     assert(node != nullptr);
     vector<ItemTableElement> local_itemtable;
@@ -290,10 +291,32 @@ vector<ItemTableElement> DataBase::buildcondTree(FPTreeNode* node, vector<pair<C
     return local_itemtable;
     // cout << "建条件模式树完成" << endl;
 }
-int DataBase::FP_growth()
+int DataBase::FP_growth(int support)
 {
+    // 将数据库中支持度过小的项删除
+    this->min_sup = support;
+
+    CandidateKey::iterator it1;
+    vector<DataItem>::iterator datait1 = database.begin();
+    for (; datait1 != database.end();) {
+        for (it1 = datait1->item_set.begin(); it1 != datait1->item_set.end();) {
+            if (initialize[*it1] < support) {
+                it1 = datait1->item_set.erase(it1);
+            } else {
+                it1++;
+            }
+        }
+        if (datait1->item_set.size() < 1) {
+            datait1 = database.erase(datait1);
+        } else {
+            datait1++;
+        }
+    }
+
+    // 创建 FP 树
+    buildFP_growthTree(support);
     assert(fptree_root != nullptr);
-    //TODO: 需要完成 FP-growth 树的挖掘
+
 
     CandidateKey profix;
 
@@ -315,15 +338,6 @@ int DataBase::FP_growth()
     fptree_root = nullptr;
 
     print(good_frequent_set);
-    // for(auto i : FPresult)
-    // {
-    //     for(auto&& j : i.first)
-    //     {
-    //         cout << j << ",";
-    //     }
-
-    //     cout <<i.second << endl;
-    // }
 
     return 1;
 }
@@ -399,14 +413,11 @@ int DataBase::minFPtree(FPTreeNode* localroot, CandidateKey& alpha, vector<ItemT
             conditem_name.clear();
         }
 
-        // cout << endl<<i.item_name << endl;
-        // print(prefix_path);
-        // break;
         //此时获得一个项的所有条件模式基 prefix_path,再给它创建一个条件模式树 和 这个树的项头表
         if (prefix_path.size() > 0) {
             FPTreeNode* condroot = new FPTreeNode("null");
             vector<ItemTableElement> local_itemtable;
-            local_itemtable = buildcondTree(condroot, prefix_path);
+            local_itemtable = createFPtree(condroot, prefix_path);
             prefix_path.clear();  //建完树就没用了
             if (local_itemtable.size() > 0) {
                 minFPtree(condroot, alpha, local_itemtable);
@@ -415,8 +426,6 @@ int DataBase::minFPtree(FPTreeNode* localroot, CandidateKey& alpha, vector<ItemT
             destroyTree(condroot);
         }
         alpha.erase(alpha.begin());
-        // alpha.pop_front();
-        // break;
     }
     if (localroot == fptree_root) {
         printf("\n");

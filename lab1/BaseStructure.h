@@ -57,12 +57,12 @@ public:
 
     int sortItem(CandidateKey& s);
     int buildFP_growthTree(int min_sup);
-    int FP_growth();
+    int FP_growth(int support);
     int minFPtree(FPTreeNode* localroot, CandidateKey& alpha,vector<ItemTableElement>& item_table);
     bool checkOnePath(FPTreeNode* root);
     int buildFP_growthTree(FPTreeNode* node);
     int buildFPtree(FPTreeNode* node, CandidateKey::iterator item_iter,CandidateKey::iterator item_end,vector<ItemTableElement>& item_table,int supply);
-    vector<ItemTableElement> buildcondTree(FPTreeNode* node, vector<pair<CandidateKey,int>>& prefix_path);
+    vector<ItemTableElement> createFPtree(FPTreeNode* node, vector<pair<CandidateKey,int>>& prefix_path);
 
     int addsibling(FPTreeNode* p, string& item_name);
     int addchild(FPTreeNode* p, string& item_name);
