@@ -5,7 +5,9 @@
 #include<string>
 int UnixUserDataBase::load(string filename)
 {
-    // vector<UserComandHistory> record;
+    //在第二次加载前 清空所有数据
+    dataset.clear();
+    destroyTree(fptree_root);
 
     ifstream fp(filename.c_str());
     if (!fp.is_open()) { // check file whether or not exist

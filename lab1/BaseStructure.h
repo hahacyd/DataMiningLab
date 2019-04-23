@@ -52,12 +52,16 @@ public:
     int size(){
         return dataset.size();
     }
+
+
+    int Apriori(int min_sup);
+    int FP_growth(int support);
+    void printResult();
+protected:
     int apriori_gen(CandidateSet& L);   //
     bool has_infrequent_subset(CandidateKey cand, CandidateSet& container);
-    int Apriori(int min_sup);
 
     int sortItem(CandidateKey& s);
-    int FP_growth(int support);
     int minFPtree(FPTreeNode* localroot, CandidateKey& alpha,vector<ItemTableElement>& item_table);
     // bool checkOnePath(FPTreeNode* root);
     // int buildFP_growthTree(FPTreeNode* node);
@@ -74,7 +78,6 @@ public:
     int print(const vector<pair<string, int> >& candset) const;
     void printtree(FPTreeNode* node, int layer);
 
-    void printResult();
     FPTreeNode* getRoot()
     {
         return fptree_root;
