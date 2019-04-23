@@ -18,15 +18,10 @@ int GroceryDataBase::load(string filename)
     // line 样例: "2","{tropical fruit,yogurt,coffee}"
     CandidateKey item_set;
     while (getline(fp, line)) {
-        // stringstream line_buffer(line);
-        // DataItem one_transaction;
-        // one_transaction.load(line);
-        // database.push_back(one_transaction);
 
         unsigned int pos_start = 1, pos_end = 0; //因为 第一个字符肯定是 "
 
         pos_end = line.find("\"", pos_start);
-        // transaction_no = stoi(line.substr(pos_start, pos_end - pos_start));
         pos_end += 4;
         pos_start = pos_end;
         pos_end = line.find("\"", pos_start);
@@ -42,20 +37,9 @@ int GroceryDataBase::load(string filename)
         dataset.push_back(make_pair(item_set, 1));
 
         item_set.clear();
-        // break;
     }
 
     fp.close();
-
-    // for(auto&& i : dataset)
-    // {
-    //     for(auto&& j : i.first)
-    //     {
-    //         cout << j << " ";
-    //     }
-    //     cout << i.second << endl;
-    // }
-
     
     //记录单一的项的出现次序
     for (auto&& i : dataset) {
@@ -63,11 +47,6 @@ int GroceryDataBase::load(string filename)
             initialize[j]++;
         }
     }
-    // for(auto&& i : initialize)
-    // {
-    //     cout << i.first << " " << i.second << endl;
-    // }
-    // exit(-1);
     // 排序每个条目:
     for(auto&& i : dataset)
     {

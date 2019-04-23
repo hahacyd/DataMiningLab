@@ -18,7 +18,6 @@ int main(int argv,char** argc)
         = string("dataset/UNIX_usage/USER") + userno + string("/sanitized_all.981115184025");
     
     string grocery_filepath = "dataset/GroceryStore/Groceries.csv";
-    // string filepath = "dataset/GroceryStore/mytran.csv";
     string filepath = unixfilepath;
     if (argv > 1) {
         filepath = string(argc[1]);

@@ -47,8 +47,6 @@ int DataBase::apriori_gen(CandidateSet& L)
             count_cut += candidate_set.erase(i.first);
         }
     }
-    // print(candidate_set);
-    // exit(-1);
     L.swap(candidate_set); // 交换 输入集合 与 输出集合,减少返回时的 复制开销
     return length;
 }
@@ -65,7 +63,6 @@ bool DataBase::has_infrequent_subset(CandidateKey cand, CandidateSet& container)
     candkey.assign(cand.begin(), cand.end());
     CandidateKey temp = candkey;
 
-    // CandidateKey::iterator it = 
     for (auto&& i : candkey) {
         temp.erase(find(temp.begin(), temp.end(), i));
         bool spaceX = 0;
@@ -112,7 +109,6 @@ int DataBase::Apriori(int min_sup)
         printf(" 完成 \n");
         //将 frequent_set 中小于 最小支持度的 频繁项集 删除
         for (CandidateSet::iterator it = frequent_set.begin(); it != frequent_set.end();) {
-            // int freq = it->second;
             if (it->second < min_sup) {
                 it = frequent_set.erase(it);
             } else {
@@ -121,7 +117,6 @@ int DataBase::Apriori(int min_sup)
         }
 
         print(frequent_set);
-        // printf(" %d 项集收集完毕 \n", k + 1);
         good_frequent_set.insert(frequent_set.begin(), frequent_set.end());
 
         progress_count = 0;
@@ -137,10 +132,8 @@ int DataBase::sortItem(CandidateKey& s)
 int DataBase::createFPtree(FPTreeNode* node, list<pair<CandidateKey, int>>& prefix_path,vector<ItemTableElement>& headpoint_table)
 {
     // assert(node != nullptr);
-    // vector<ItemTableElement> local_itemtable;
     for (auto&& i : prefix_path) {
         // 调用此程序来将每个 Trans 加入到FP 树中
-        // CandidateKey s = i.first;
         buildFPtree(node, i.first.begin(), i.first.end(), headpoint_table, i.second);
     }
     return 1;
@@ -173,12 +166,7 @@ int DataBase::FP_growth(int support)
     }
 
     // 创建 FP 树
-    // buildFP_growthTree(support);
     createFPtree(this->fptree_root, dataset,this->item_table);
-    // printtree(fptree_root, 0);
-    // cout << "结束" << deletecount <<"数据集大小 "<<dataset.size() <<endl;
-    // return 1;
-
     // assert(fptree_root != nullptr);
 
     // 挖掘 FP 树
@@ -210,15 +198,6 @@ static list<pair<CandidateKey, int>> prefix_path; //获取前缀路径
 int DataBase::minFPtree(FPTreeNode* localroot, CandidateKey& alpha, vector<ItemTableElement>& item_table)
 {
     // assert(localroot != nullptr);
-    // if(item_table.size() == 1 && alpha.size() >= 1 && item_table.begin()->supply >= min_sup){
-    //     alpha.push_front(item_table.begin()->item_name);
-    //     good_frequent_set[alpha] = item_table.begin()->supply;
-    //     alpha.pop_front();
-    //     return 1;
-    // }
-    // if (localroot->child == nullptr) {
-    //     return 1;
-    // }
     //对 item_table 排序
     sort(item_table.begin(),
        item_table.end(), [](ItemTableElement s1, ItemTableElement s2) -> bool { return s1.supply < s2.supply; });
@@ -243,7 +222,6 @@ int DataBase::minFPtree(FPTreeNode* localroot, CandidateKey& alpha, vector<ItemT
         }
 
         alpha.push_front(i.item_name);//这是性能考量，对于vector,在前面插入数据太慢了
-        // alpha.insert(alpha.begin(), i.item_name);
 
         if (alpha.size() >= 2 && i.supply >= min_sup) {
             good_frequent_set[alpha] = i.supply;
@@ -257,15 +235,12 @@ int DataBase::minFPtree(FPTreeNode* localroot, CandidateKey& alpha, vector<ItemT
             // 找出 某个头表项的每一条路径
             it = j->parent;
             for (; it->getItemName() != "null"; it = it->parent) {
-                // conditem_name.insert(conditem_name.begin(), it->getItemName());
                 conditem_name.push_front(it->getItemName());
             }
             // 如果对某个项来说 它就是离根最近的节点，那么就忽略
             if (conditem_name.size() < 1) {
                 continue;
             }
-            // sortItem(conditem_name);
-            // prefix_path[conditem_name] = j->getSupply();
             prefix_path.push_back(make_pair(conditem_name, j->getSupply()));
             conditem_name.clear();
         }
@@ -282,7 +257,6 @@ int DataBase::minFPtree(FPTreeNode* localroot, CandidateKey& alpha, vector<ItemT
             // 树挖掘完毕后 回收空间，
             destroyTree(condroot);
         }
-        // alpha.erase(alpha.begin());
         alpha.pop_front();
     }
     if (localroot == fptree_root) {
@@ -304,7 +278,6 @@ int DataBase::buildFPtree(FPTreeNode* node, CandidateKey::iterator item_iter, Ca
     // assert(item_iter != item_end);
     FPTreeNode* child = node->child;
     if (child == nullptr) {
-        // node->child = new FPTreeNode(*item_iter);
         addchild(node, *item_iter);
         node->child->addSupply(supply);
 
@@ -312,7 +285,6 @@ int DataBase::buildFPtree(FPTreeNode* node, CandidateKey::iterator item_iter, Ca
 
         buildFPtree(node->child, ++item_iter, item_end, item_table, supply);
     } else { // 在node 的孩子节点上找 到与当前项(item)相同的节点
-        // vector<string>::iterator it = item_iter;
         FPTreeNode *sibling = child, *cur = child;
         //在这一层查找 符合条件的节点
         while (sibling != nullptr && sibling->getItemName() != *item_iter) {
@@ -351,7 +323,6 @@ void DataBase::printtree(FPTreeNode* node, int layer)
     for (; it != nullptr; it = it->sibling) {
         printtree(it, layer + 2);
     }
-    // cout << endl;
 }
 int DataBase::addsibling(FPTreeNode* p, string& item_name)
 {
