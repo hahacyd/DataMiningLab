@@ -23,7 +23,12 @@ int main(int argv,char** argc)
     if (argv > 1) {
         filepath = string(argc[1]);
     }
+
+    //TODO: 在新建对象时指定路径
     // GroceryDataBase grocerybase(filepath);
+    
+    
+    // TODO: 在调用算法接口时 指定支持度
     // grocerybase.FP_growth(100);
     // grocerybase.Apriori(100);
     // grocerybase.printResult();

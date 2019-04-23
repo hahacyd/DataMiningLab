@@ -13,6 +13,8 @@ Objs := $(CxxSources:.cpp=.o)
 analysize:$(Objs)
 	$(GXX)	-o $@ $(CXXFLAGS)  $(Objs)
 
+run:analysize
+	./analysize
 -include $(CxxSources:.cpp=.d)
 
 %.d : %.cpp
@@ -25,4 +27,4 @@ analysize:$(Objs)
 
 clean:
 	@echo $(CxxSources)
-	rm $(CxxSources:.cpp=.d) $(CxxSources:.cpp=.o) 
+	rm $(CxxSources:.cpp=.d) $(CxxSources:.cpp=.o) analysize
